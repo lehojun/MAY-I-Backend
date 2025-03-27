@@ -21,5 +21,5 @@ public class User {
     private String user_name;
 
     @Column(nullable = false)
-    private String password;
+    private String user_password;
 }
