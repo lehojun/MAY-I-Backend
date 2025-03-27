@@ -17,8 +17,6 @@ public class Response {
 
     private LocalDateTime response_at;
 
-
-    // 메시지 message (Text) -> 줄바뀜을 쉽게 가져오려고한건데 찾아봐야함.
     @Column(columnDefinition = "TEXT") // MySQL의 TEXT 타입으로 매핑
     private String message;
 
