@@ -10,15 +10,15 @@ import lombok.Setter;
 public class Token {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long token_id;
+    private Long tokenId;
 
     @Column(length = 30)
-    private String token_type;
+    private String tokenType;
 
     @Column(length = 200)
-    private String token_value;
+    private String tokenValue;
 
     @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "userId", referencedColumnName = "userId")
     private User user;
 }

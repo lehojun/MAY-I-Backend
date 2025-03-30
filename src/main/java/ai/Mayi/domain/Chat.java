@@ -10,19 +10,19 @@ import java.time.LocalDateTime;
 public class Chat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long chat_id;
+    private Long chatId;
 
     @Column(length = 100)
-    private String chat_name;
+    private String chatName;
     
-    private LocalDateTime create_at;
+    private LocalDateTime createdAt;
 
     public Chat() {
-        this.create_at = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 
     //외래키로 User 엔티티의 user_id를 가져온다.
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "userId")
     private User user;
 }

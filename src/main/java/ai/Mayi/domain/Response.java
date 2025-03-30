@@ -10,21 +10,21 @@ import java.time.LocalDateTime;
 public class Response {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long response_id;
+    private long responseId;
 
     @Column(length = 30)
-    private String response_type;
+    private String responseType;
 
-    private LocalDateTime response_at;
+    private LocalDateTime responseAt;
 
     @Column(columnDefinition = "TEXT") // MySQL의 TEXT 타입으로 매핑
     private String message;
 
     @OneToOne
-    @JoinColumn(name = "chat_id")
+    @JoinColumn(name = "chatId")
     private Chat chat;
 
     public Response() {
-        this.response_at = LocalDateTime.now();
+        this.responseAt = LocalDateTime.now();
     }
 }
