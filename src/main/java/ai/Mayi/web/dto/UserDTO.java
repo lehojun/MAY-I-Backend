@@ -10,22 +10,46 @@ public class UserDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @ToString
-    public static class UserRequestDTO {
-        private Long user_id;
+    public static class JoinRequestDTO {
         @NotNull
-        private String user_email;
+        private String userEmail;
         @NotNull
-        private String user_name;
+        private String userName;
         @NotNull
-        private String user_password;
+        private String userPassword;
     }
 
     @Builder
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class UserResponseDTO {
-        private Long user_id;
-        private String user_email;
+    public static class JoinResponseDTO {
+        private Long userId;
+        private String userEmail;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LoginRequestDTO {
+        @NotNull
+        private String userEmail;
+
+        @NotNull
+        private String userPassword;
+    }
+
+    @Builder
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LoginResponseDTO {
+
+        private String userEmail;
+        private String userName;
+
+    }
+
 }
