@@ -20,3 +20,6 @@ spring:
       name: ${SECURITY_USERNAME}
       password: ${SECURITY_PASSWORD}
 
+  #jwt 설정
+jwt:
+  secret: ${JWT_SECRETCODE}
