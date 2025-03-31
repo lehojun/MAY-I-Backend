@@ -10,18 +10,20 @@ import java.time.LocalDateTime;
 public class Response {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "response_id")
     private long responseId;
 
-    @Column(length = 30)
+    @Column(name = "response_type", length = 30)
     private String responseType;
 
+    @Column(name = "response_at")
     private LocalDateTime responseAt;
 
     @Column(columnDefinition = "TEXT") // MySQL의 TEXT 타입으로 매핑
     private String message;
 
-    @OneToOne
-    @JoinColumn(name = "chatId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chat_id")
     private Chat chat;
 
     public Response() {

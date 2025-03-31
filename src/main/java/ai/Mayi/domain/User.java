@@ -20,14 +20,21 @@ import java.util.stream.Collectors;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long userId;
 
-    @Column(length = 50, unique = true)
+    @Column(name = "user_email", length = 50, unique = true)
     private String userEmail;
 
-    @Column(length = 10)
+    @Column(name = "user_name", length = 10)
     private String userName;
 
-    @Column(nullable = false)
+    @Column(name = "user_password", nullable = false)
     private String userPassword;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Chat> chats;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Token> tokens;
 }

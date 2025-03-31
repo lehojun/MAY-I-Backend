@@ -10,15 +10,16 @@ import lombok.Setter;
 public class Token {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "token_id")
     private Long tokenId;
 
-    @Column(length = 30)
+    @Column(name = "token_type", length = 30)
     private String tokenType;
 
-    @Column(length = 200)
+    @Column(name = "token_value", length = 200)
     private String tokenValue;
 
-    @OneToOne
-    @JoinColumn(name = "userId", referencedColumnName = "userId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 }
