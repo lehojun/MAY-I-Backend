@@ -3,12 +3,17 @@ package ai.Mayi.domain;
 import ai.Mayi.domain.enums.TokenType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @Getter
-@Setter
+@DynamicUpdate
+@DynamicInsert
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Token {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

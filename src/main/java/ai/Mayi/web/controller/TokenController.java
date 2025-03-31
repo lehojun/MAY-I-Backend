@@ -1,16 +1,27 @@
 package ai.Mayi.web.controller;
 
 import ai.Mayi.service.TokenService;
+import ai.Mayi.web.dto.CommonDTO;
+import ai.Mayi.web.dto.TokenDTO;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.apache.coyote.BadRequestException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "FolderController", description = "토큰 관련 API")
+@Tag(name = "TokenController", description = "토큰 관련 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/token")
+@RequestMapping("token")
 public class TokenController {
     private final TokenService tokenService;
 
+    @PostMapping("")
+    @Operation(summary = "토큰 저장 API")
+    public ResponseEntity<CommonDTO.IsSuccessDTO> createNoteUUID(@RequestBody @Valid TokenDTO.saveTokenReqDto request) {
+
+        return ResponseEntity.ok(tokenService.saveToken(request));
+    }
 }

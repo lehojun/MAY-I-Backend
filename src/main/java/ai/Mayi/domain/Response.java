@@ -13,7 +13,7 @@ public class Response {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "response_id")
-    private long responseId;
+    private Long responseId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "response_type", length = 30)
