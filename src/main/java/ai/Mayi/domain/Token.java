@@ -1,6 +1,8 @@
 package ai.Mayi.domain;
 
+import ai.Mayi.domain.enums.TokenType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,8 +15,10 @@ public class Token {
     @Column(name = "token_id")
     private Long tokenId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "token_type", length = 30)
-    private String tokenType;
+    @NotNull
+    private TokenType tokenType;
 
     @Column(name = "token_value", length = 200)
     private String tokenValue;

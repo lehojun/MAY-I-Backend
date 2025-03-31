@@ -1,6 +1,8 @@
 package ai.Mayi.domain;
 
+import ai.Mayi.domain.enums.ResponseType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -13,8 +15,10 @@ public class Response {
     @Column(name = "response_id")
     private long responseId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "response_type", length = 30)
-    private String responseType;
+    @NotNull
+    private ResponseType responseType;
 
     @Column(name = "response_at")
     private LocalDateTime responseAt;
