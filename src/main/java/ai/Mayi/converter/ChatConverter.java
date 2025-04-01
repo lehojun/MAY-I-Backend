@@ -24,4 +24,10 @@ public class ChatConverter {
                 .chatId(chat.getChatId())
                 .build();
     }
+    public ChatDTO.ChatListResponseDTO toChatListDTO(Chat chat) {
+        return ChatDTO.ChatListResponseDTO.builder()
+                .chatId(chat.getChatId())
+                .chatName(chat.getChatName())
+                .build();
+    }
 }

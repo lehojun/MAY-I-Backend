@@ -23,4 +23,13 @@ public class ChatDTO {
     public static class ChatResponseDTO {
         private Long chatId;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ChatListResponseDTO {
+        private Long chatId;
+        private String chatName;
+    }
 }
