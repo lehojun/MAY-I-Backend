@@ -1,5 +1,6 @@
 package ai.Mayi.web.controller;
 
+import ai.Mayi.apiPayload.ApiResponse;
 import ai.Mayi.apiPayload.code.status.ErrorStatus;
 import ai.Mayi.apiPayload.exception.handler.MessageHandler;
 import ai.Mayi.domain.Chat;
@@ -13,7 +14,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +32,7 @@ public class MessageController {
 
     @PostMapping("")
     @Operation(summary = "채팅 입력 API")
-    public ResponseEntity<MessageDTO.enterChatResDTO> enterChat(@RequestBody @Valid MessageDTO.enterChatReqDTO request) {
+    public ApiResponse<MessageDTO.enterChatResDTO> enterChat(@RequestBody @Valid MessageDTO.enterChatReqDTO request) {
         User user = userService.findUserById(request.getUserId());
         Chat chat = chatService.findChatById(request.getChatId());
 
@@ -76,7 +76,7 @@ public class MessageController {
                             .build();
                 }).toList();
 
-        return ResponseEntity.ok(MessageDTO.enterChatResDTO.builder()
+        return ApiResponse.onSuccess(MessageDTO.enterChatResDTO.builder()
                         .chatId(chat.getChatId())
                         .responseDTOList(responseDTOList)
                 .build());
