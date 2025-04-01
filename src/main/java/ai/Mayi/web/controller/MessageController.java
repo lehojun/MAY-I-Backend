@@ -43,6 +43,7 @@ public class MessageController {
         messageService.enterChat(chat, request.getText());
 
         List<MessageDTO.ChatResDTO> responseDTOList = request.getAiTypeList().stream()
+                .parallel()
                 .map(messageType -> {
                     Message message = Message.builder()
                             .chat(chat)
