@@ -1,5 +1,8 @@
 package ai.Mayi.service;
 
+import ai.Mayi.apiPayload.code.status.ErrorStatus;
+import ai.Mayi.apiPayload.exception.handler.MessageHandler;
+import ai.Mayi.domain.Chat;
 import ai.Mayi.domain.User;
 import ai.Mayi.repository.UserRepository;
 import ai.Mayi.web.dto.UserDTO;
@@ -37,5 +40,9 @@ public class UserServiceImpl implements UserService{
         log.info("Sign up user: " + user.getUserName());
 
         userRepository.save(user);
+    }
+
+    public User findUserById(Long userId){
+        return userRepository.findByUserId(userId).orElseThrow(() -> new MessageHandler(ErrorStatus._NOT_EXIST_USER));
     }
 }
