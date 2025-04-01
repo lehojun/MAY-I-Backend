@@ -1,8 +1,7 @@
 package ai.Mayi.service;
 
-import ai.Mayi.apiPayload.code.BaseCode;
 import ai.Mayi.apiPayload.code.status.ErrorStatus;
-import ai.Mayi.apiPayload.exception.GeneralException;
+import ai.Mayi.apiPayload.exception.handler.TokenHandler;
 import ai.Mayi.domain.Token;
 import ai.Mayi.domain.User;
 import ai.Mayi.domain.enums.TokenType;
@@ -14,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -22,13 +24,12 @@ public class TokenService {
     private final UserRepository userRepository;
 
     public CommonDTO.IsSuccessDTO saveToken(TokenDTO.saveTokenReqDto request){
-        User user = userRepository.findByUserId(request.getUserId()).orElseThrow(() -> new GeneralException(ErrorStatus._BAD_REQUEST));
-
-        //기존 토큰 정보 전체 삭제
-        tokenRepository.deleteAll(tokenRepository.findByUser(user));
+        User user = userRepository.findByUserId(request.getUserId()).orElseThrow(() -> new TokenHandler(ErrorStatus._NOT_EXIST_USER));
+        final List<Token> tokenList = tokenRepository.findByUser(user);
 
         //입력한 토큰 정보 삽입
         request.getTokenList().forEach(tokenDto -> {
+            //토큰 타입 매칭
             TokenType tokenType;
             if(tokenDto.getTokenType().toUpperCase().equals(TokenType.GPT.toString())){
                 tokenType = TokenType.GPT;
@@ -39,14 +40,35 @@ public class TokenService {
             } else if (tokenDto.getTokenType().toUpperCase().equals(TokenType.CLAUDE.toString())) {
                 tokenType = TokenType.CLAUDE;
             } else {
-                throw new GeneralException(ErrorStatus._BAD_REQUEST);
+                throw new TokenHandler(ErrorStatus._NOT_EXIST_TOKEN_TYPE);
             }
 
+            //기존 토큰 정보 삭제
+            Optional<Token> oldToken = tokenList.stream().filter(token -> token.getTokenType().equals(tokenType)).findFirst();
+            oldToken.ifPresent(tokenRepository::delete);
+
+            //토큰 저장
             tokenRepository.save(Token.builder().user(user).tokenType(tokenType).tokenValue(tokenDto.getValue()).build());
         });
 
         return CommonDTO.IsSuccessDTO.builder()
                 .isSuccess(true)
+                .build();
+    }
+
+    public TokenDTO.getTokenResDto getToken(Long userId){
+        User user = userRepository.findByUserId(userId).orElseThrow(() -> new TokenHandler(ErrorStatus._NOT_EXIST_USER));
+
+        List<TokenDTO.tokenDto> tokenDtoList = tokenRepository.findByUser(user).stream()
+                .map(token -> TokenDTO.tokenDto.builder().
+                        tokenType(token.getTokenType().toString())
+                        .value(token.getTokenValue())
+                        .build()
+                )
+                .toList();
+        return TokenDTO.getTokenResDto.builder()
+                .userId(user.getUserId())
+                .tokenList(tokenDtoList)
                 .build();
     }
 }
