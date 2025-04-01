@@ -15,35 +15,35 @@ public class MessageDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(title = "RESPONSE_REQ_01 : 채팅 입력 요청 DTO")
+    @Schema(title = "MESSAGE_REQ_01 : 채팅 입력 요청 DTO")
     public static class enterChatReqDTO {
         @NotNull
         private Long chatId;
         @NotNull
         private Long userId;
         @NotNull
-        private List<MessageType> AItypeList;
+        private List<MessageType> aiTypeList;
         @NotNull
-        private String message;
+        private String text;
     }
 
     @Builder
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(title = "RESPONSE_DTO_01 : 채팅 응답 DTO")
+    @Schema(title = "MESSAGE_DTO_01 : 채팅 응답 DTO")
     public static class ChatResDTO {
         @NotNull
         private MessageType messageType;
         @NotNull
-        private String message;
+        private String text;
     }
 
     @Builder
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(title = "RESPONSE_REQ_01 : 채팅 입력 응답 DTO")
+    @Schema(title = "MESSAGE_REQ_01 : 채팅 입력 응답 DTO")
     public static class enterChatResDTO {
         @NotNull
         private Long chatId;
