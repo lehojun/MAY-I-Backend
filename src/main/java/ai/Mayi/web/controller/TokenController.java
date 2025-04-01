@@ -20,8 +20,15 @@ public class TokenController {
 
     @PostMapping("")
     @Operation(summary = "토큰 저장 API")
-    public ResponseEntity<CommonDTO.IsSuccessDTO> createNoteUUID(@RequestBody @Valid TokenDTO.saveTokenReqDto request) {
+    public ResponseEntity<CommonDTO.IsSuccessDTO> saveToken(@RequestBody @Valid TokenDTO.saveTokenReqDto request) {
 
         return ResponseEntity.ok(tokenService.saveToken(request));
+    }
+
+    @GetMapping("")
+    @Operation(summary = "토큰 조회 API")
+    public ResponseEntity<TokenDTO.getTokenResDto> getToken(@RequestParam @Valid Long userId) {
+
+        return ResponseEntity.ok(tokenService.getToken(userId));
     }
 }
