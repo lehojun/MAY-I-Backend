@@ -18,7 +18,11 @@ public enum ErrorStatus implements BaseErrorCode {
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
 
     //유저 관련 응답
-    _NOT_EXIST_USER(HttpStatus.NOT_FOUND, "USER501", "존재하지 않는 유저 아이디입니다");
+    _NOT_EXIST_USER(HttpStatus.NOT_FOUND, "USER501", "존재하지 않는 유저 아이디입니다"),
+
+    //토큰 관련 응답
+    _NOT_EXIST_TOKEN_TYPE(HttpStatus.NOT_FOUND, "TOKEN501", "존재하지 않는 토큰 타입입니다"),
+    ;
 
     private final HttpStatus httpStatus;
     private final String code;
