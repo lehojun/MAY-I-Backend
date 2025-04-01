@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -33,5 +35,14 @@ public class ChatService {
         chatRepository.save(newChat);
 
         return newChat;
+    }
+
+    @Transactional
+    public List<ChatDTO.ChatListResponseDTO> getChatList(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new ChatHandler(ErrorStatus._NOT_EXIST_USER));
+
+        List<Chat> chatList = chatRepository.findByUser(user);
+        return chatList.stream().map(chatConverter::toChatListDTO).toList();
     }
 }
