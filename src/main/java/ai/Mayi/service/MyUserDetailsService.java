@@ -1,7 +1,6 @@
 package ai.Mayi.service;
 
 import ai.Mayi.repository.UserRepository;
-import ai.Mayi.web.dto.UserDTO;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

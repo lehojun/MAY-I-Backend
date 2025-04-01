@@ -46,10 +46,7 @@ public class UserDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class LoginResponseDTO {
-
-        private String userEmail;
-        private String userName;
-
+        private Long userId;
     }
 
 }

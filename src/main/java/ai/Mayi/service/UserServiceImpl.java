@@ -6,13 +6,17 @@ import ai.Mayi.web.dto.UserDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public void signUp(UserDTO.JoinRequestDTO joinDto) throws Exception {
 
@@ -37,5 +41,28 @@ public class UserServiceImpl implements UserService{
         log.info("Sign up user: " + user.getUserName());
 
         userRepository.save(user);
+    }
+
+    public UserDTO.LoginResponseDTO commonLogin(UserDTO.LoginRequestDTO loginRequestDTO) throws Exception {
+        String userEmail = loginRequestDTO.getUserEmail();
+        String userPassword = loginRequestDTO.getUserPassword();
+
+        Optional<User> user = userRepository.findByUserEmail(userEmail);
+
+        if(user == null){
+            log.error("존재하지 않는 이메일 입니다.");
+            throw new Exception("존재하지 않는 이메일입니다.");
+        }
+
+        if(!passwordEncoder.matches(userPassword, user.get().getUserPassword())){
+            log.error("비밀번호가 일치하지 않습니다.");
+            log.error("입력된 비밀번호: {}", userPassword); // 로깅 추가
+            log.error("저장된 해시 비밀번호: {}", user.get().getUserPassword()); // 로깅 추가
+            throw new Exception("비밀번호가 일치하지 않습니다.");
+        }
+
+        return UserDTO.LoginResponseDTO.builder()
+                .userId(user.get().getUserId())
+                .build();
     }
 }

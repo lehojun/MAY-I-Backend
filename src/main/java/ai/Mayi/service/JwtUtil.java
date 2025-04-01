@@ -2,6 +2,7 @@ package ai.Mayi.service;
 
 import javax.crypto.SecretKey;
 
+import ai.Mayi.web.dto.JwtToken;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -25,7 +26,7 @@ public class JwtUtil {
 
 
     // JWT create
-    public static String createToken(Authentication auth) {
+    public static JwtToken createToken(Authentication auth) {
 
         var user = (CustomUser) auth.getPrincipal();
 
@@ -33,20 +34,43 @@ public class JwtUtil {
         String authorities = auth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
 
-        return Jwts.builder()
-                .claim("user_email", user.getUserEmail())
-                .claim("authorities", authorities) //권한
+        String accessToken = Jwts.builder()
+                .claim("userEmail", user.getUserEmail())
+                .claim("auth", authorities) //권한
                 .issuedAt(new Date(System.currentTimeMillis())) //jwt 발행
-                .expiration(new Date(System.currentTimeMillis() + 10000)) //ms 단위
+                .expiration(new Date(System.currentTimeMillis() + 100000)) //ms 단위
                 .signWith(key) //해싱
                 .compact();
+
+        String refreshToken = Jwts.builder()
+                .expiration(new Date(System.currentTimeMillis() + 3600000)) //ms 단위
+                .signWith(key) //해싱
+                .compact();
+
+        return JwtToken.builder()
+                .grantType("Bearer")
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+
+//        >> return 타입 String으로 변환 [단순히 accessToken만 발행]
+//        return Jwts.builder()
+//                .claim("userEmail", user.getUserEmail())
+//                .claim("auth", authorities) //권한
+//                .issuedAt(new Date(System.currentTimeMillis())) //jwt 발행
+//                .expiration(new Date(System.currentTimeMillis() + 100000)) //ms 단위
+//                .signWith(key) //해싱
+//                .compact();
     }
 
-    // JWT extract
-    public static Claims extractToken(String token) {
+//    // JWT extract
+//    public static Claims extractToken(String token) {
+//
+//        return Jwts.parser().verifyWith(key).build()
+//                .parseSignedClaims(token).getPayload(); //유저정보
+//    }
 
-        return Jwts.parser().verifyWith(key).build()
-                .parseSignedClaims(token).getPayload(); //유저정보
-    }
+    //토큰 정보 체크 메서드
+
 
 }
