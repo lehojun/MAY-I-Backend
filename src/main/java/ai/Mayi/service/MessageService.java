@@ -32,17 +32,11 @@ public class MessageService {
     }
 
     @Async
-    public CompletableFuture<MessageDTO.ChatResDTO> GPTService(@NotNull List<MessageType> aiTypeList, Message message) throws InterruptedException {
+    public CompletableFuture<MessageDTO.ChatResDTO> GPTService(@NotNull List<MessageType> aiTypeList, Message message){
         if(!aiTypeList.contains(MessageType.GPT)) {
             return null;
         }
 
-        long add = 0;
-        for(long i = 0; i<5; i++){
-            System.out.println("GPTService processing: " + add);
-            add += 1;
-        }
-        System.out.println("GPTService End: " + add);
         return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
                 .text("")
                 .messageType(MessageType.GPT)
@@ -50,17 +44,10 @@ public class MessageService {
     }
 
     @Async
-    public CompletableFuture<MessageDTO.ChatResDTO> CopliotService(@NotNull List<MessageType> aiTypeList, Message message) throws InterruptedException {
+    public CompletableFuture<MessageDTO.ChatResDTO> CopliotService(@NotNull List<MessageType> aiTypeList, Message message){
         if(!aiTypeList.contains(MessageType.COPLIOT)) {
             return null;
         }
-
-        long add = 0;
-        for(long i = 0; i<5; i++){
-            System.out.println("CopliotService processing: " + add);
-            add += 1;
-        }
-        System.out.println("CopliotService End: " + add);
 
         return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
                 .text("")
@@ -69,17 +56,11 @@ public class MessageService {
     }
 
     @Async
-    public CompletableFuture<MessageDTO.ChatResDTO> BardService(@NotNull List<MessageType> aiTypeList, Message message) throws InterruptedException {
+    public CompletableFuture<MessageDTO.ChatResDTO> BardService(@NotNull List<MessageType> aiTypeList, Message message){
         if(!aiTypeList.contains(MessageType.BARD)) {
             return null;
         }
 
-        long add = 0;
-        for(long i = 0; i<5; i++){
-            System.out.println("BardService processing: " + add);
-            add += 1;
-        }
-        System.out.println("BardService End: " + add);
         return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
                 .text("")
                 .messageType(MessageType.BARD)
@@ -87,17 +68,11 @@ public class MessageService {
     }
 
     @Async
-    public CompletableFuture<MessageDTO.ChatResDTO> ClaudeService(@NotNull List<MessageType> aiTypeList, Message message) throws InterruptedException {
+    public CompletableFuture<MessageDTO.ChatResDTO> ClaudeService(@NotNull List<MessageType> aiTypeList, Message message){
         if(!aiTypeList.contains(MessageType.CLAUDE)) {
             return null;
         }
 
-        long add = 0;
-        for(long i = 0; i<5; i++){
-            System.out.println("ClaudeService processing: " + add);
-            add += 1;
-        }
-        System.out.println("ClaudeService End: " + add);
         return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
                 .text("")
                 .messageType(MessageType.CLAUDE)

@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @Tag(name = "MessageController", description = "채팅 메세지 관련 API")
@@ -36,12 +37,15 @@ public class MessageController {
 
     @PostMapping("")
     @Operation(summary = "채팅 입력 API")
-    public ApiResponse<MessageDTO.enterChatResDTO> enterChat(@RequestBody @Valid MessageDTO.enterChatReqDTO request) throws ExecutionException, InterruptedException {
+    public ApiResponse<MessageDTO.enterChatResDTO> enterChat(@RequestBody @Valid MessageDTO.enterChatReqDTO request) throws InterruptedException, ExecutionException {
         User user = userService.findUserById(request.getUserId());
         Chat chat = chatService.findChatById(request.getChatId());
 
         if(chat.getUser() != user){
             throw new MessageHandler(ErrorStatus._NOT_MATCH_CHAT);
+        }
+        if(request.getAiTypeList().contains(MessageType.USER)){
+            throw new MessageHandler(ErrorStatus._INVALID_AI_TYPE);
         }
 
         messageService.enterChat(chat, request.getText());
@@ -50,11 +54,24 @@ public class MessageController {
                 .chat(chat)
                 .build();
 
+        List<CompletableFuture<MessageDTO.ChatResDTO>> futures = new ArrayList<>();
+        if (request.getAiTypeList().contains(MessageType.GPT)) {
+            futures.add(messageService.GPTService(request.getAiTypeList(), message));
+        }
+        if (request.getAiTypeList().contains(MessageType.COPLIOT)) {
+            futures.add(messageService.CopliotService(request.getAiTypeList(), message));
+        }
+        if (request.getAiTypeList().contains(MessageType.CLAUDE)) {
+            futures.add(messageService.ClaudeService(request.getAiTypeList(), message));
+        }
+        if (request.getAiTypeList().contains(MessageType.BARD)) {
+            futures.add(messageService.BardService(request.getAiTypeList(), message));
+        }
+
         List<MessageDTO.ChatResDTO> responseDTOList = new ArrayList<>();
-        responseDTOList.add(messageService.GPTService(request.getAiTypeList(), message).get());
-        responseDTOList.add(messageService.CopliotService(request.getAiTypeList(), message).get());
-        responseDTOList.add(messageService.ClaudeService(request.getAiTypeList(), message).get());
-        responseDTOList.add(messageService.BardService(request.getAiTypeList(), message).get());
+        for (CompletableFuture<MessageDTO.ChatResDTO> future : futures) {
+            responseDTOList.add(future.get());
+        }
 
         responseDTOList.remove(null);
 
