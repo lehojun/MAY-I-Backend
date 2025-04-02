@@ -3,13 +3,17 @@ package ai.Mayi.service;
 import ai.Mayi.apiPayload.code.status.ErrorStatus;
 import ai.Mayi.apiPayload.exception.handler.MessageHandler;
 import ai.Mayi.domain.User;
+import ai.Mayi.jwt.CookieUtil;
 import ai.Mayi.jwt.JwtUtil;
 import ai.Mayi.repository.UserRepository;
 import ai.Mayi.web.dto.JwtTokenDTO;
 import ai.Mayi.web.dto.UserDTO;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.Response;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -62,12 +66,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    public JwtTokenDTO commonLogin(UserDTO.LoginRequestDTO loginRequestDTO) throws Exception {
+    public JwtTokenDTO commonLogin(UserDTO.LoginRequestDTO loginRequestDTO, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
         String userEmail = loginRequestDTO.getUserEmail();
         String userPassword = loginRequestDTO.getUserPassword();
 
         Optional<User> user = userRepository.findByUserEmail(userEmail);
-
+        
+        //처음 로그인 할때
+//        if(CookieUtil.getCookieValue(request, ))
         if (user == null) {
             log.error("존재하지 않는 이메일 입니다.");
             throw new Exception("존재하지 않는 이메일입니다.");
@@ -104,11 +111,21 @@ public class UserServiceImpl implements UserService {
         user.get().updateRefreshToken(refreshToken);
         userRepository.save(user.get());
 
+        //쿠키에 AccessToken, RefreshToken save
+        sendTokenResponse(response, jwtTokenDTO);
+
 
         UserDTO.LoginResponseDTO.builder()
                 .userId(user.get().getUserId())
                 .build();
 
         return jwtTokenDTO;
+    }
+
+    public void sendTokenResponse(HttpServletResponse response, JwtTokenDTO jwtTokenDTO){
+        // Cookie AccessToken lifeTime : 1m
+        CookieUtil.addCookie(response, "accessToken", jwtTokenDTO.getAccessToken(), 600);
+        // Cookie RefreshToken lifeTime : 1h
+        CookieUtil.addCookie(response, "refreshToken", jwtTokenDTO.getRefreshToken(), 3600);
     }
 }

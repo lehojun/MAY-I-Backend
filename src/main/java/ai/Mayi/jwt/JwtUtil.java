@@ -66,7 +66,7 @@ public class JwtUtil {
 
     //jwt Token 복호화
     public Authentication getAuthentication(String accessToken) {
-        //jwt 토큰 복호화
+
         Claims claims = parseClaims(accessToken);
 
         if (claims.get("auth") != null) {
@@ -81,6 +81,8 @@ public class JwtUtil {
         UserDetails principal = new User(claims.getSubject(), "", authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
+    
+
 
     public boolean validateToken(String token) {
         try{
@@ -100,6 +102,8 @@ public class JwtUtil {
         }
         return false;
     }
+
+
 
 
     private Claims parseClaims(String accessToken) {

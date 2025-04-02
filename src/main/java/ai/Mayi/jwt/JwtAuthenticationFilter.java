@@ -38,10 +38,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
 
-    // Request Header에서 토큰 정보 추출
+    // 쿠키에서 토큰 정보 추출
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
+
+            log.info("JWT accessToken is {}", bearerToken.substring(7));
+
             return bearerToken.substring(7);
         }
         return null;
