@@ -21,18 +21,18 @@ import java.util.concurrent.CompletableFuture;
 public class MessageService {
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
-    public void enterChat(Chat chat, String text){
+    public Message enterChat(Chat chat, String text){
         Message message = Message.builder()
                 .chat(chat)
                 .messageType(MessageType.USER)
                 .text(text)
                 .build();
 
-        messageRepository.save(message);
+        return messageRepository.save(message);
     }
 
     @Async
-    public CompletableFuture<MessageDTO.ChatResDTO> GPTService(@NotNull List<MessageType> aiTypeList, Message message){
+    public CompletableFuture<MessageDTO.ChatResDTO> GPTService(@NotNull List<MessageType> aiTypeList, Message userMessage){
         if(!aiTypeList.contains(MessageType.GPT)) {
             return null;
         }
@@ -44,7 +44,7 @@ public class MessageService {
     }
 
     @Async
-    public CompletableFuture<MessageDTO.ChatResDTO> CopliotService(@NotNull List<MessageType> aiTypeList, Message message){
+    public CompletableFuture<MessageDTO.ChatResDTO> CopliotService(@NotNull List<MessageType> aiTypeList, Message userMessage){
         if(!aiTypeList.contains(MessageType.COPLIOT)) {
             return null;
         }
@@ -56,7 +56,7 @@ public class MessageService {
     }
 
     @Async
-    public CompletableFuture<MessageDTO.ChatResDTO> BardService(@NotNull List<MessageType> aiTypeList, Message message){
+    public CompletableFuture<MessageDTO.ChatResDTO> BardService(@NotNull List<MessageType> aiTypeList, Message userMessage){
         if(!aiTypeList.contains(MessageType.BARD)) {
             return null;
         }
@@ -68,7 +68,7 @@ public class MessageService {
     }
 
     @Async
-    public CompletableFuture<MessageDTO.ChatResDTO> ClaudeService(@NotNull List<MessageType> aiTypeList, Message message){
+    public CompletableFuture<MessageDTO.ChatResDTO> ClaudeService(@NotNull List<MessageType> aiTypeList, Message userMessage){
         if(!aiTypeList.contains(MessageType.CLAUDE)) {
             return null;
         }

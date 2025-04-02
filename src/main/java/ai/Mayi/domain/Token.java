@@ -25,7 +25,7 @@ public class Token {
     @NotNull
     private TokenType tokenType;
 
-    @Column(name = "token_value", length = 200)
+    @Column(name = "token_value", length = 1000)
     private String tokenValue;
 
     @ManyToOne(fetch = FetchType.LAZY)

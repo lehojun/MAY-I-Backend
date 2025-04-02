@@ -48,24 +48,20 @@ public class MessageController {
             throw new MessageHandler(ErrorStatus._INVALID_AI_TYPE);
         }
 
-        messageService.enterChat(chat, request.getText());
-
-        Message message = Message.builder()
-                .chat(chat)
-                .build();
+        Message userMessage = messageService.enterChat(chat, request.getText());
 
         List<CompletableFuture<MessageDTO.ChatResDTO>> futures = new ArrayList<>();
         if (request.getAiTypeList().contains(MessageType.GPT)) {
-            futures.add(messageService.GPTService(request.getAiTypeList(), message));
+            futures.add(messageService.GPTService(request.getAiTypeList(), userMessage));
         }
         if (request.getAiTypeList().contains(MessageType.COPLIOT)) {
-            futures.add(messageService.CopliotService(request.getAiTypeList(), message));
+            futures.add(messageService.CopliotService(request.getAiTypeList(), userMessage));
         }
         if (request.getAiTypeList().contains(MessageType.CLAUDE)) {
-            futures.add(messageService.ClaudeService(request.getAiTypeList(), message));
+            futures.add(messageService.ClaudeService(request.getAiTypeList(), userMessage));
         }
         if (request.getAiTypeList().contains(MessageType.BARD)) {
-            futures.add(messageService.BardService(request.getAiTypeList(), message));
+            futures.add(messageService.BardService(request.getAiTypeList(), userMessage));
         }
 
         List<MessageDTO.ChatResDTO> responseDTOList = new ArrayList<>();
