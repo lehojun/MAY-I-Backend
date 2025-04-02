@@ -11,7 +11,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -61,8 +64,32 @@ public class MessageService {
             return null;
         }
 
+        //webClient init
+        WebClient webClient = WebClient.builder().build();
+        String key = "AIzaSyBucCD5YYUVHVRd6mK4beOHk99dAV3EKfs";
+        String uri = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + key;
+
+        //req body init
+        List<MessageDTO.BardContents.Parts> partsList = new ArrayList<>();
+        partsList.add(MessageDTO.BardContents.Parts.builder().text(userMessage.getText()).build());
+
+        List<MessageDTO.BardContents> contentsList = new ArrayList<>();
+        contentsList.add(MessageDTO.BardContents.builder().parts(partsList).build());
+
+        MessageDTO.BardChatReqDTO reqBody = MessageDTO.BardChatReqDTO.builder()
+                .contents(contentsList)
+                .build();
+
+        //url call
+        MessageDTO.BardChatResDTO resBody = webClient.post()
+                .uri(uri)
+                .body(Mono.just(reqBody), MessageDTO.BardChatReqDTO.class)
+                .retrieve()
+                .bodyToMono(MessageDTO.BardChatResDTO.class)
+                .block();
+
         return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
-                .text("")
+                .text(resBody.getCandidates().get(0).getContent().getParts().get(0).getText())
                 .messageType(MessageType.BARD)
                 .build());
     }
