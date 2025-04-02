@@ -22,6 +22,10 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //토큰 관련 응답
     _NOT_EXIST_TOKEN_TYPE(HttpStatus.NOT_FOUND, "TOKEN501", "존재하지 않는 토큰 타입입니다"),
+
+    //채팅 관련 응답
+    _NOT_EXIST_CHAT(HttpStatus.NOT_FOUND, "CHAT501", "존재하지 않는 채팅방 아이디입니다"),
+    _NOT_MATCH_CHAT(HttpStatus.NOT_FOUND, "CHAT501", "사용할 수 없는 채팅방입니다."),
     ;
 
     private final HttpStatus httpStatus;

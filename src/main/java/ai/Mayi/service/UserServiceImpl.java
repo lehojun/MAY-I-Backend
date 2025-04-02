@@ -1,5 +1,7 @@
 package ai.Mayi.service;
 
+import ai.Mayi.apiPayload.code.status.ErrorStatus;
+import ai.Mayi.apiPayload.exception.handler.MessageHandler;
 import ai.Mayi.domain.User;
 import ai.Mayi.jwt.JwtUtil;
 import ai.Mayi.repository.UserRepository;
@@ -55,10 +57,8 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    public Long getUserIdByEmail(String userEmail) {
-        return userRepository.findByUserEmail(userEmail)
-                .map(User::getUserId)  // User 객체에서 userId 값만 추출
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public User findUserById(Long userId){
+        return userRepository.findByUserId(userId).orElseThrow(() -> new MessageHandler(ErrorStatus._NOT_EXIST_USER));
     }
 
     @Transactional

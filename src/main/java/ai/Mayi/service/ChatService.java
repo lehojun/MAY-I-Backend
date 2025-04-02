@@ -45,4 +45,8 @@ public class ChatService {
         List<Chat> chatList = chatRepository.findByUser(user);
         return chatList.stream().map(chatConverter::toChatListDTO).toList();
     }
+
+    public Chat findChatById(Long chatId){
+        return chatRepository.findByChatId(chatId).orElseThrow(() -> new ChatHandler(ErrorStatus._NOT_EXIST_CHAT));
+    }
 }
