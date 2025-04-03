@@ -30,7 +30,8 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //AI 관련 응답
     _NOT_EXIST_TOKEN(HttpStatus.NOT_FOUND, "AI501", "토큰을 보유하고 있지 않습니다"),
-    _BARD_RESPONSE_NULL(HttpStatus.INTERNAL_SERVER_ERROR, "AI502", "존재하지 않는 채팅방 아이디입니다"),
+    _BARD_CONNECT_FAIL(HttpStatus.BAD_REQUEST, "AI502", "Bard 응답 요청 중 에러가 발생했습니다"),
+    _BARD_RESPONSE_NULL(HttpStatus.INTERNAL_SERVER_ERROR, "AI503", "Bard 응답값이 비어있습니다"),
     ;
 
     private final HttpStatus httpStatus;
