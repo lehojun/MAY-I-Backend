@@ -2,11 +2,14 @@ package ai.Mayi.service;
 
 import ai.Mayi.apiPayload.code.status.ErrorStatus;
 import ai.Mayi.apiPayload.exception.handler.MessageHandler;
+import ai.Mayi.apiPayload.exception.handler.TokenHandler;
 import ai.Mayi.domain.Chat;
 import ai.Mayi.domain.Message;
+import ai.Mayi.domain.Token;
 import ai.Mayi.domain.enums.MessageType;
 import ai.Mayi.repository.ChatRepository;
 import ai.Mayi.repository.MessageRepository;
+import ai.Mayi.repository.TokenRepository;
 import ai.Mayi.web.dto.MessageDTO;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +29,7 @@ import java.util.concurrent.CompletableFuture;
 public class MessageService {
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
+    private final TokenRepository tokenRepository;
     public Message enterChat(Chat chat, String text){
         Message message = Message.builder()
                 .chat(chat)
@@ -65,10 +69,13 @@ public class MessageService {
         if(!aiTypeList.contains(MessageType.BARD)) {
             return null;
         }
-
+        Token bardToken = tokenRepository.findByUser(userMessage.getChat().getUser()).stream()
+                .filter(token -> token.getTokenType().toString().equals(MessageType.BARD.toString()))
+                .findFirst()
+                .orElseThrow(() -> new MessageHandler(ErrorStatus._NOT_EXIST_TOKEN));
         //webClient init
         WebClient webClient = WebClient.builder().build();
-        String key = "";
+        String key = bardToken.getTokenValue();
         String uri = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + key;
 
         //req body init
