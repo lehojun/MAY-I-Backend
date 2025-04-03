@@ -107,23 +107,64 @@ public class MessageService {
     }
 
     @Async
-    public CompletableFuture<MessageDTO.ChatResDTO> CopliotService(@NotNull List<MessageType> aiTypeList, Message userMessage) {
-        if (!aiTypeList.contains(MessageType.COPLIOT)) {
-            return null;
+    public CompletableFuture<MessageDTO.ChatResDTO> DeepSeekService(Message userMessage) {
+        //get User Token
+        Token deepSeekToken = tokenRepository.findByUser(userMessage.getChat().getUser()).stream()
+                .filter(token -> token.getTokenType().toString().equals(MessageType.DEEPSEEK.toString()))
+                .findFirst()
+                .orElseThrow(() -> new MessageHandler(ErrorStatus._NOT_EXIST_TOKEN));
+        String key = deepSeekToken.getTokenValue();
+
+        //webClient init
+        WebClient webClient = WebClient.builder().build();
+        String uri = "https://api.deepseek.com/chat/completions";
+
+        //req body init
+        List<MessageDTO.DeepSeekMessage> messageList = new ArrayList<>();
+        messageList.add(MessageDTO.DeepSeekMessage.builder().role("user").content(userMessage.getText()).build());
+        MessageDTO.DeepSeekChatReqDTO reqBody = MessageDTO.DeepSeekChatReqDTO.builder()
+                .model("deepseek-chat")
+                .messages(messageList)
+                .build();
+
+        //url call
+        MessageDTO.DeepSeekChatResDTO resBody;
+        try {
+            resBody = webClient.post()
+                    .uri(uri)
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
+                    .header("Authorization", "Bearer " + key)
+                    .body(Mono.just(reqBody), MessageDTO.DeepSeekChatResDTO.class)
+                    .retrieve()
+                    .bodyToMono(MessageDTO.DeepSeekChatResDTO.class)
+                    .block();
+        } catch (WebClientResponseException.Unauthorized e) {
+            throw new MessageHandler(ErrorStatus._DEEPSEEK_CONNECT_FAIL);
         }
 
+        //save response
+        if (resBody != null) {
+            String text = resBody.getChoices().get(0).getMessage().getContent();
 
-        return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
-                .text("")
-                .messageType(MessageType.COPLIOT)
-                .build());
+            Message message = Message.builder()
+                    .chat(userMessage.getChat())
+                    .messageType(MessageType.DEEPSEEK)
+                    .text(text)
+                    .build();
+            messageRepository.save(message);
+
+            return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
+                    .text(text)
+                    .messageType(MessageType.DEEPSEEK)
+                    .build());
+        } else {
+            throw new MessageHandler(ErrorStatus._DEEPSEEK_RESPONSE_NULL);
+        }
     }
 
     @Async
-    public CompletableFuture<MessageDTO.ChatResDTO> BardService(@NotNull List<MessageType> aiTypeList, Message userMessage) {
-        if (!aiTypeList.contains(MessageType.BARD)) {
-            return null;
-        }
+    public CompletableFuture<MessageDTO.ChatResDTO> BardService(Message userMessage) {
         //get User Token
         Token bardToken = tokenRepository.findByUser(userMessage.getChat().getUser()).stream()
                 .filter(token -> token.getTokenType().toString().equals(MessageType.BARD.toString()))
