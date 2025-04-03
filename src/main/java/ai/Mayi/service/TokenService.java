@@ -33,8 +33,8 @@ public class TokenService {
             TokenType tokenType;
             if(tokenDto.getTokenType().toUpperCase().equals(TokenType.GPT.toString())){
                 tokenType = TokenType.GPT;
-            } else if (tokenDto.getTokenType().toUpperCase().equals(TokenType.COPLIOT.toString())) {
-                tokenType = TokenType.COPLIOT;
+            } else if (tokenDto.getTokenType().toUpperCase().equals(TokenType.DEEPSEEK.toString())) {
+                tokenType = TokenType.DEEPSEEK;
             } else if (tokenDto.getTokenType().toUpperCase().equals(TokenType.BARD.toString())) {
                 tokenType = TokenType.BARD;
             } else if (tokenDto.getTokenType().toUpperCase().equals(TokenType.CLAUDE.toString())) {

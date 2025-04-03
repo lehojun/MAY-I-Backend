@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,14 +53,14 @@ public class MessageController {
         if (request.getAiTypeList().contains(MessageType.GPT)) {
             futures.add(messageService.GPTService(request.getAiTypeList(), userMessage));
         }
-        if (request.getAiTypeList().contains(MessageType.COPLIOT)) {
-            futures.add(messageService.CopliotService(request.getAiTypeList(), userMessage));
+        if (request.getAiTypeList().contains(MessageType.DEEPSEEK)) {
+            futures.add(messageService.DeepSeekService(userMessage));
         }
         if (request.getAiTypeList().contains(MessageType.CLAUDE)) {
             futures.add(messageService.ClaudeService(request.getAiTypeList(), userMessage));
         }
         if (request.getAiTypeList().contains(MessageType.BARD)) {
-            futures.add(messageService.BardService(request.getAiTypeList(), userMessage));
+            futures.add(messageService.BardService(userMessage));
         }
 
         List<MessageDTO.ChatResDTO> responseDTOList = new ArrayList<>();

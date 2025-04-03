@@ -107,23 +107,17 @@ public class MessageService {
     }
 
     @Async
-    public CompletableFuture<MessageDTO.ChatResDTO> CopliotService(@NotNull List<MessageType> aiTypeList, Message userMessage) {
-        if (!aiTypeList.contains(MessageType.COPLIOT)) {
-            return null;
-        }
+    public CompletableFuture<MessageDTO.ChatResDTO> DeepSeekService(Message userMessage) {
 
 
         return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
                 .text("")
-                .messageType(MessageType.COPLIOT)
+                .messageType(MessageType.DEEPSEEK)
                 .build());
     }
 
     @Async
-    public CompletableFuture<MessageDTO.ChatResDTO> BardService(@NotNull List<MessageType> aiTypeList, Message userMessage) {
-        if (!aiTypeList.contains(MessageType.BARD)) {
-            return null;
-        }
+    public CompletableFuture<MessageDTO.ChatResDTO> BardService(Message userMessage) {
         //get User Token
         Token bardToken = tokenRepository.findByUser(userMessage.getChat().getUser()).stream()
                 .filter(token -> token.getTokenType().toString().equals(MessageType.BARD.toString()))
