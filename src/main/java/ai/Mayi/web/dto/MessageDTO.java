@@ -92,7 +92,7 @@ public class MessageDTO {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(title = "BARD_REQ_01 : Bard 입력 요청 DTO")
+    @Schema(title = "BARD_COMMON_01 : Bard DTO")
     public static class BardContents {
         private String role;
         private List<Parts> parts;
@@ -116,7 +116,7 @@ public class MessageDTO {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(title = "BARD_REQ_01 : Bard 입력 응답 DTO")
+    @Schema(title = "BARD_RES_01 : Bard 입력 응답 DTO")
     public static class BardChatResDTO {
         @NotNull
         private List<Candidates> candidates;
@@ -147,20 +147,68 @@ public class MessageDTO {
         }
     }
 
-        @Builder
-        @Data
-        public static class ClaudeReqDto {
-            private String model;
-            private List<Message> messages;
-            private int max_tokens;
+    @Builder
+    @Data
+    public static class ClaudeReqDto {
+        private String model;
+        private List<Message> messages;
+        private int max_tokens;
 
-            @Data
-            @Builder
-            public static class Message {
-                private String role;
-                private String content;
-            }
+        @Data
+        @Builder
+        public static class Message {
+            private String role;
+            private String content;
         }
     }
 
+    @Builder
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(title = "DEEPSEEK_COMMON_01 : DeepSek DTO")
+    public static class DeepSeekMessage {
+        @NotNull
+        private String content;
+        @NotNull
+        private String role;
+    }
+
+    @Builder
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(title = "DEEPSEEK_REQ_01 : DeepSeek 입력 요청 DTO")
+    public static class DeepSeekChatReqDTO {
+        @NotNull
+        private List<DeepSeekMessage> messages;
+        @NotNull
+        private String model;
+
+    }
+
+    @Builder
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(title = "DEEPSEEK_RES_01 : DeepSeek 입력 응답 DTO")
+    public static class DeepSeekChatResDTO {
+        @NotNull
+        private String id;
+        @NotNull
+        private String model;
+        @NotNull
+        private List<Choice> choices;
+
+        @Data
+        public static class Choice {
+            @NotNull
+            private Integer index;
+            @NotNull
+            private String finish_reason;
+            @NotNull
+            private DeepSeekMessage message;
+        }
+    }
+    }
 
