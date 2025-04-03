@@ -23,3 +23,8 @@ spring:
   #jwt 설정
 jwt:
   secret: ${JWT_SECRETCODE}
+
+gpt:
+  model: gpt-3.5-turbo
+  api:
+    url: "https://api.openai.com/v1/chat/completions"

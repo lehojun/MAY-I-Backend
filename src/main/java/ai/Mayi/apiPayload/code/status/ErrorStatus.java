@@ -32,6 +32,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _NOT_EXIST_TOKEN(HttpStatus.NOT_FOUND, "AI501", "토큰을 보유하고 있지 않습니다"),
     _BARD_CONNECT_FAIL(HttpStatus.BAD_REQUEST, "AI502", "Bard 응답 요청 중 에러가 발생했습니다"),
     _BARD_RESPONSE_NULL(HttpStatus.INTERNAL_SERVER_ERROR, "AI503", "Bard 응답값이 비어있습니다"),
+    _GPT_RESPONSE_NULL(HttpStatus.INTERNAL_SERVER_ERROR, "AI504", "GPT 응답값이 비어있습니다"),
     ;
 
     private final HttpStatus httpStatus;

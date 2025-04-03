@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MessageDTO {
@@ -48,6 +49,45 @@ public class MessageDTO {
         private List<ChatResDTO> responseDTOList;
     }
 
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class gptChatMessage {
+        private String role;
+        private String content;
+    }
+
+    @Data
+    public static class gptReqDTO {
+
+        private String model;
+        private List<gptChatMessage> messages;
+        private int n;
+
+        public gptReqDTO(String model, String message) {
+            this.model = model;
+            this.messages = new ArrayList<gptChatMessage>();
+            this.messages.add(new gptChatMessage("user",message));
+
+            this.n = 1;
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class gptResDTO {
+
+        private List<Choice> choices;
+
+        @Data
+        @AllArgsConstructor
+        @NoArgsConstructor
+        public static class Choice {
+            private int index;
+            private gptChatMessage message;
+        }
+    }
     @Builder
     @Data
     @NoArgsConstructor
@@ -62,6 +102,7 @@ public class MessageDTO {
             private String text;
         }
     }
+
     @Builder
     @Data
     @NoArgsConstructor
@@ -92,3 +133,4 @@ public class MessageDTO {
 
     }
 }
+
