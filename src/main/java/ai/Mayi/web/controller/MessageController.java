@@ -52,13 +52,13 @@ public class MessageController {
 
         List<CompletableFuture<MessageDTO.ChatResDTO>> futures = new ArrayList<>();
         if (request.getAiTypeList().contains(MessageType.GPT)) {
-            futures.add(messageService.GPTService(request.getAiTypeList(), userMessage));
+            futures.add(messageService.GPTService(userMessage));
         }
         if (request.getAiTypeList().contains(MessageType.COPLIOT)) {
             futures.add(messageService.CopliotService(request.getAiTypeList(), userMessage));
         }
         if (request.getAiTypeList().contains(MessageType.CLAUDE)) {
-            futures.add(messageService.ClaudeService(request.getAiTypeList(), userMessage));
+            futures.add(messageService.ClaudeService(userMessage));
         }
         if (request.getAiTypeList().contains(MessageType.BARD)) {
             futures.add(messageService.BardService(request.getAiTypeList(), userMessage));
