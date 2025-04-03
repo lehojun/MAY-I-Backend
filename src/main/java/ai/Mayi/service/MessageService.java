@@ -1,5 +1,7 @@
 package ai.Mayi.service;
 
+import ai.Mayi.apiPayload.code.status.ErrorStatus;
+import ai.Mayi.apiPayload.exception.handler.MessageHandler;
 import ai.Mayi.domain.Chat;
 import ai.Mayi.domain.Message;
 import ai.Mayi.domain.enums.MessageType;
@@ -66,7 +68,7 @@ public class MessageService {
 
         //webClient init
         WebClient webClient = WebClient.builder().build();
-        String key = "AIzaSyBucCD5YYUVHVRd6mK4beOHk99dAV3EKfs";
+        String key = "";
         String uri = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + key;
 
         //req body init
@@ -88,10 +90,24 @@ public class MessageService {
                 .bodyToMono(MessageDTO.BardChatResDTO.class)
                 .block();
 
-        return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
-                .text(resBody.getCandidates().get(0).getContent().getParts().get(0).getText())
-                .messageType(MessageType.BARD)
-                .build());
+        if (resBody != null) {
+            String text = resBody.getCandidates().get(0).getContent().getParts().get(0).getText();
+
+            Message message = Message.builder()
+                    .chat(userMessage.getChat())
+                    .messageType(MessageType.BARD)
+                    .text(text)
+                    .build();
+            messageRepository.save(message);
+
+            return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
+                    .text(text)
+                    .messageType(MessageType.BARD)
+                    .build());
+        }
+        else {
+            throw new MessageHandler(ErrorStatus._BARD_RESPONSE_NULL);
+        }
     }
 
     @Async

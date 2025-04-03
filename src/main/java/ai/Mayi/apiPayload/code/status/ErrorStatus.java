@@ -27,6 +27,9 @@ public enum ErrorStatus implements BaseErrorCode {
     _NOT_EXIST_CHAT(HttpStatus.NOT_FOUND, "CHAT501", "존재하지 않는 채팅방 아이디입니다"),
     _NOT_MATCH_CHAT(HttpStatus.NOT_FOUND, "CHAT502", "사용할 수 없는 채팅방입니다."),
     _INVALID_AI_TYPE(HttpStatus.NOT_FOUND, "CHAT503", "유효하지 않은 AI 타입입니다."),
+
+    //AI 관련 응답
+    _BARD_RESPONSE_NULL(HttpStatus.INTERNAL_SERVER_ERROR, "AI501", "존재하지 않는 채팅방 아이디입니다"),
     ;
 
     private final HttpStatus httpStatus;
