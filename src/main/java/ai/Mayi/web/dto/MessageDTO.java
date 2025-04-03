@@ -88,4 +88,49 @@ public class MessageDTO {
             private gptChatMessage message;
         }
     }
+    @Builder
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(title = "BARD_REQ_01 : Bard 입력 요청 DTO")
+    public static class BardContents {
+        private String role;
+        private List<Parts> parts;
+        @Data
+        @Builder
+        public static class Parts {
+            private String text;
+        }
+    }
+
+    @Builder
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(title = "BARD_REQ_01 : Bard 입력 요청 DTO")
+    public static class BardChatReqDTO {
+        @NotNull
+        private List<BardContents> contents;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(title = "BARD_REQ_01 : Bard 입력 응답 DTO")
+    public static class BardChatResDTO {
+        @NotNull
+        private List<Candidates> candidates;
+        @NotNull
+        private String modelVersion;
+        @NotNull
+        private Object usageMetadata;
+        @Data
+        public static class Candidates {
+            private BardContents content;
+            private String finishReason;
+            private Double avgLogprobs;
+        }
+
+    }
 }
+
