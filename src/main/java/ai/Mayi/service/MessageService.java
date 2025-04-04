@@ -3,27 +3,23 @@ package ai.Mayi.service;
 import ai.Mayi.apiPayload.code.status.ErrorStatus;
 import ai.Mayi.apiPayload.exception.handler.TokenHandler;
 import ai.Mayi.config.AIConfig;
-import ai.Mayi.apiPayload.code.status.ErrorStatus;
 import ai.Mayi.apiPayload.exception.handler.MessageHandler;
 import ai.Mayi.domain.Chat;
 import ai.Mayi.domain.Message;
 import ai.Mayi.domain.Token;
 import ai.Mayi.domain.User;
-import ai.Mayi.domain.Token;
 import ai.Mayi.domain.enums.MessageType;
 import ai.Mayi.domain.enums.TokenType;
 import ai.Mayi.repository.ChatRepository;
 import ai.Mayi.repository.MessageRepository;
 import ai.Mayi.repository.TokenRepository;
 import ai.Mayi.web.dto.MessageDTO;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -44,11 +40,10 @@ public class MessageService {
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
     private final TokenRepository tokenRepository;
-    @Value("${gpt.model}")
-    private String gptModel;
-
-    @Value("${gpt.api.url}")
-    private String gptUrl;
+    @Value("${ai.model.gpt}") private String gptModel;
+    @Value("${ai.api.url.gpt}") private String gptUrl;
+    @Value("${ai.model.claude}") private String claudeModel;
+    @Value("${ai.api.url.claude}") private String claudeUrl;
 
     public Message enterChat(Chat chat, String text){
         Message message = Message.builder()
@@ -62,21 +57,15 @@ public class MessageService {
     }
 
     @Async
-    public CompletableFuture<MessageDTO.ChatResDTO> GPTService(@NotNull List<MessageType> aiTypeList, Message userMessage) {
+    public CompletableFuture<MessageDTO.ChatResDTO> GPTService(Message userMessage) {
 
-
-        if (!aiTypeList.contains(MessageType.GPT)) {
-            return null;
-        }
         User user = userMessage.getChat().getUser();
         Token token = tokenRepository.findByUserAndTokenType(user, TokenType.GPT);
 
-        if (token == null) {
-            throw new TokenHandler(ErrorStatus._BAD_REQUEST);
-        }
+        if (token == null) throw new TokenHandler(ErrorStatus._BAD_REQUEST);
 
         //api call
-        HttpHeaders headers = aiConfig.httpHeaders();
+        HttpHeaders headers = aiConfig.gptHeaders();
         headers.set("Authorization", "Bearer " + token.getTokenValue());
 
         MessageDTO.gptReqDTO chatRequest = new MessageDTO.gptReqDTO(gptModel,userMessage.getText());
@@ -86,9 +75,9 @@ public class MessageService {
         RestTemplate restTemplate = new RestTemplate();
         MessageDTO.gptResDTO response = restTemplate.postForObject(gptUrl, requestEntity, MessageDTO.gptResDTO.class);
 
-        if (response == null || response.getChoices() == null || response.getChoices().isEmpty()) {
+        if (response == null || response.getChoices() == null || response.getChoices().isEmpty())
             throw new TokenHandler(ErrorStatus._GPT_RESPONSE_NULL);
-        }
+
 
         //save response
         Message message = Message.builder()
@@ -163,6 +152,9 @@ public class MessageService {
         }
     }
 
+
+
+
     @Async
     public CompletableFuture<MessageDTO.ChatResDTO> BardService(Message userMessage) {
         //get User Token
@@ -220,16 +212,63 @@ public class MessageService {
         }
     }
 
+
     @Async
-    public CompletableFuture<MessageDTO.ChatResDTO> ClaudeService(@NotNull List<MessageType> aiTypeList, Message userMessage) {
-        if (!aiTypeList.contains(MessageType.CLAUDE)) {
-            return null;
+    public CompletableFuture<MessageDTO.ChatResDTO> ClaudeService(Message userMessage) {
+
+        User user = userMessage.getChat().getUser();
+        Token token = tokenRepository.findByUserAndTokenType(user, TokenType.CLAUDE);
+        int maxTokens = 1000;
+
+        if (token == null)  throw new TokenHandler(ErrorStatus._BAD_REQUEST);
+
+        //webClient init
+        WebClient webClient = WebClient.builder()
+                .baseUrl(claudeUrl)
+                .defaultHeader("x-api-key", token.getTokenValue())
+                .defaultHeader("anthropic-version", "2023-06-01")
+                .defaultHeader("content-type", "application/json")
+                .build();
+
+        MessageDTO.ClaudeReqDto request = MessageDTO.ClaudeReqDto.builder()
+                .model(claudeModel)
+                .messages(List.of(MessageDTO.ClaudeReqDto.Message.builder()
+                                .role("user")
+                                .content(userMessage.getText())
+                        .build()))
+                .max_tokens(maxTokens)
+                .build();
+
+        MessageDTO.claudeResDto response;
+        try {
+            response = webClient.post()
+                    .bodyValue(request)
+                    .retrieve()
+                    .bodyToMono(MessageDTO.claudeResDto.class)
+                    .block();
+        } catch (WebClientResponseException.BadRequest e) {
+            throw new MessageHandler(ErrorStatus._BARD_CONNECT_FAIL);
         }
 
-        return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
-                .text("")
-                .messageType(MessageType.CLAUDE)
-                .build());
+        //save response
+        if (response != null) {
+            String text = response.getContent().get(0).getText();
+
+            Message message = Message.builder()
+                    .chat(userMessage.getChat())
+                    .messageType(MessageType.BARD)
+                    .text(text)
+                    .build();
+            messageRepository.save(message);
+
+            return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
+                    .text(text)
+                    .messageType(MessageType.CLAUDE)
+                    .build());
+        } else {
+            throw new MessageHandler(ErrorStatus._CLAUDE_RESPONSE_NULL);
+        }
+
     }
 
 }

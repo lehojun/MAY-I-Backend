@@ -132,6 +132,36 @@ public class MessageDTO {
         }
     }
 
+    @Data
+    public static class claudeResDto {
+        private List<Content> content;
+        private String id;
+        private String model;
+        private String role;
+        private String type;
+
+        @Data
+        public static class Content {
+            public String text;
+            public String type;
+        }
+    }
+
+    @Builder
+    @Data
+    public static class ClaudeReqDto {
+        private String model;
+        private List<Message> messages;
+        private int max_tokens;
+
+        @Data
+        @Builder
+        public static class Message {
+            private String role;
+            private String content;
+        }
+    }
+
     @Builder
     @Data
     @NoArgsConstructor
@@ -169,8 +199,9 @@ public class MessageDTO {
         private String model;
         @NotNull
         private List<Choice> choices;
+
         @Data
-        public static class Choice{
+        public static class Choice {
             @NotNull
             private Integer index;
             @NotNull
@@ -179,5 +210,5 @@ public class MessageDTO {
             private DeepSeekMessage message;
         }
     }
-}
+    }
 
