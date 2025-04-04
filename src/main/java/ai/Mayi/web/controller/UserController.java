@@ -1,7 +1,9 @@
 package ai.Mayi.web.controller;
+import ai.Mayi.apiPayload.ApiResponse;
 import ai.Mayi.service.UserServiceImpl;
 import ai.Mayi.web.dto.JwtTokenDTO;
 import ai.Mayi.web.dto.UserDTO;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,31 +18,30 @@ import java.util.Map;
 @RequestMapping("/user")
 public class UserController {
     private final UserServiceImpl userserviceImpl;
-
+    
     @PostMapping("/login")
-    public UserDTO.LoginResponseDTO login(@RequestBody UserDTO.LoginRequestDTO loginRequestDTO, HttpServletRequest request, HttpServletResponse response) throws Exception {
-       return userserviceImpl.commonLogin(loginRequestDTO,request ,response);
+    @Operation(summary = "로그인 API")
+    public ApiResponse<String> login(@RequestBody UserDTO.LoginRequestDTO loginRequestDTO, HttpServletRequest request, HttpServletResponse response) throws Exception {
+       userserviceImpl.commonLogin(loginRequestDTO,request ,response);
+       return ApiResponse.onSuccess("로그인 완료되었습니다.");
     }
 
     @PostMapping("/logout")
-    public void logout(HttpServletResponse response) {
+    @Operation(summary = "로그아웃 API")
+    public ApiResponse<String> logout(HttpServletResponse response) {
         userserviceImpl.loginOut(response);
+        return ApiResponse.onSuccess("로그아웃 완료되었습니다.");
     }
 
 
     @PostMapping("/register")
-    public String user_register(@RequestBody UserDTO.JoinRequestDTO joinDto) throws Exception {
+    @Operation(summary = "회원가입 API")
+    public ApiResponse<String> user_register(@RequestBody UserDTO.JoinRequestDTO joinDto) throws Exception {
 
         log.info("Registering post user: {}", joinDto.toString());
 
         userserviceImpl.signUp(joinDto);
 
-        return "good";
+        return ApiResponse.onSuccess("회원가입이 완료되었습니다.");
     }
-
-    @PostMapping("/test")
-    public String test() {
-        return "success";
-    }
-
 }

@@ -100,13 +100,9 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-    public ResponseEntity<ReasonDTO> loginOut(HttpServletResponse response) {
+    public void loginOut(HttpServletResponse response) {
         CookieUtil.addCookie(response, "accessToken", null, 0);
         CookieUtil.addCookie(response, "refreshToken", null, 0);
-
-        return ResponseEntity
-                .status(SuccessStatus._OK.getHttpStatus())
-                .body(SuccessStatus._OK.getReason());
     }
 
 
