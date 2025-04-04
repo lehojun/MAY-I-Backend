@@ -179,11 +179,14 @@ public class MessageService {
                 .toList();
 
         //req body resizing
-        int firstIndex = contentsList.size() - Math.min(contentsList.size(), 3);
-        List<MessageDTO.BardContents> contentsSubList = contentsList.subList(firstIndex, contentsList.size());
-        if(contentsSubList.size() > 1){
-            if(contentsSubList.get(1).getRole().equals("user")){
-                contentsSubList = contentsSubList.subList(contentsList.size() - 1, contentsList.size());
+        int firstIndex = contentsList.size() - Math.min(contentsList.size(), 5);
+        List<MessageDTO.BardContents> contentsSubList = new ArrayList<>(contentsList.subList(firstIndex, contentsList.size()));
+        while(contentsSubList.size() > 1){
+            if(contentsSubList.get(contentsSubList.size() - 2).getRole().equals("user")){
+                contentsSubList.remove(contentsSubList.size() - 2);
+            }
+            else {
+                break;
             }
         }
 
