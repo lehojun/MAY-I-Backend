@@ -18,8 +18,8 @@ public class UserController {
     
     @PostMapping("/login")
     @Operation(summary = "로그인 API")
-    public ApiResponse<String> login(@RequestBody UserDTO.LoginRequestDTO loginRequestDTO, HttpServletRequest request, HttpServletResponse response) {
-       userserviceImpl.commonLogin(loginRequestDTO,request ,response);
+    public ApiResponse<String> login(@RequestBody UserDTO.LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
+       userserviceImpl.commonLogin(loginRequestDTO, response);
        return ApiResponse.onSuccess("로그인 완료되었습니다.");
     }
 

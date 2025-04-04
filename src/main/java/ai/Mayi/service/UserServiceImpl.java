@@ -59,13 +59,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    public UserDTO.LoginResponseDTO commonLogin(UserDTO.LoginRequestDTO loginRequestDTO, HttpServletRequest request, HttpServletResponse response) {
+    public void commonLogin(UserDTO.LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
 
         String userEmail = loginRequestDTO.getUserEmail();
         String userPassword = loginRequestDTO.getUserPassword();
 
-        Optional<User> userOpt = Optional.ofNullable(userRepository.findByUserEmail(userEmail).orElseThrow(() -> new UserHandler(ErrorStatus._NOT_EXIST_EMAIL)));;
-        User user = userOpt.get();
+        Optional<User> userOpt = Optional.ofNullable(userRepository.findByUserEmail(userEmail).orElseThrow(() -> new UserHandler(ErrorStatus._NOT_EXIST_EMAIL)));
+
+        User user = userOpt.orElseThrow(() -> new UserHandler(ErrorStatus._NOT_EXIST_USER));
 
         if (!passwordEncoder.matches(userPassword, user.getUserPassword())) {
             log.error("비밀번호가 일치하지 않습니다.");
@@ -80,18 +81,11 @@ public class UserServiceImpl implements UserService {
 
         JwtTokenDTO jwtTokenDTO = JwtUtil.generateToken(authentication);
 
-        log.info("access token: {}", jwtTokenDTO.getAccessToken());
-        log.info("refresh token: {}", jwtTokenDTO.getRefreshToken());
-
         //login, refreshToken save
         user.updateRefreshToken(jwtTokenDTO.getRefreshToken());
         userRepository.save(user);
 
         sendTokenResponse(response, jwtTokenDTO);
-
-        return UserDTO.LoginResponseDTO.builder()
-                .userId(user.getUserId())
-                .build();
     }
 
     public void loginOut(HttpServletResponse response) {
