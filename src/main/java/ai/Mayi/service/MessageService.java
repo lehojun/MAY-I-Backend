@@ -2,7 +2,6 @@ package ai.Mayi.service;
 
 import ai.Mayi.apiPayload.code.status.ErrorStatus;
 import ai.Mayi.apiPayload.exception.handler.TokenHandler;
-import ai.Mayi.config.AIConfig;
 import ai.Mayi.apiPayload.exception.handler.MessageHandler;
 import ai.Mayi.domain.Chat;
 import ai.Mayi.domain.Message;
@@ -14,18 +13,14 @@ import ai.Mayi.repository.ChatRepository;
 import ai.Mayi.repository.MessageRepository;
 import ai.Mayi.repository.TokenRepository;
 import ai.Mayi.web.dto.MessageDTO;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.time.LocalDateTime;
@@ -36,8 +31,6 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @RequiredArgsConstructor
 public class MessageService {
-    private final AIConfig aiConfig;
-    private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
     private final TokenRepository tokenRepository;
     @Value("${ai.model.gpt}") private String gptModel;
@@ -64,35 +57,47 @@ public class MessageService {
 
         if (token == null) throw new TokenHandler(ErrorStatus._BAD_REQUEST);
 
-        //api call
-        HttpHeaders headers = aiConfig.gptHeaders();
-        headers.set("Authorization", "Bearer " + token.getTokenValue());
-
         MessageDTO.gptReqDTO chatRequest = new MessageDTO.gptReqDTO(gptModel,userMessage.getText());
 
-        HttpEntity<MessageDTO.gptReqDTO> requestEntity = new HttpEntity<>(chatRequest, headers);
-
-        RestTemplate restTemplate = new RestTemplate();
-        MessageDTO.gptResDTO response = restTemplate.postForObject(gptUrl, requestEntity, MessageDTO.gptResDTO.class);
-
-        if (response == null || response.getChoices() == null || response.getChoices().isEmpty())
-            throw new TokenHandler(ErrorStatus._GPT_RESPONSE_NULL);
-
-
-        //save response
-        Message message = Message.builder()
-                .chat(userMessage.getChat())
-                .messageType(MessageType.GPT)
-                .messageAt(LocalDateTime.now())
+        //webClient init
+        WebClient webClient = WebClient.builder()
+                .baseUrl(gptUrl)
+                .defaultHeader("Authorization", "Bearer " + token.getTokenValue())
                 .build();
 
-        messageRepository.save(message);
 
+        //Url call
+        MessageDTO.gptResDTO response;
+        try {
+             response = webClient.post()
+                    .uri(gptUrl)
+                    .bodyValue(chatRequest)
+                    .retrieve()
+                    .bodyToMono(MessageDTO.gptResDTO.class)
+                    .block();
+        } catch (WebClientResponseException.BadRequest e) {
+            throw new MessageHandler(ErrorStatus._GPT_CONNECT_FAIL);
+        }
 
-        return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
-                .text(response.getChoices().get(0).getMessage().getContent())
-                .messageType(MessageType.GPT)
-                .build());
+        //save response
+        if (response != null) {
+            String text = response.getChoices().get(0).getMessage().getContent();
+
+            Message message = Message.builder()
+                    .chat(userMessage.getChat())
+                    .messageType(MessageType.GPT)
+                    .messageAt(LocalDateTime.now())
+                    .text(text)
+                    .build();
+            messageRepository.save(message);
+
+            return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
+                    .text(text)
+                    .messageType(MessageType.GPT)
+                    .build());
+        } else {
+            throw new MessageHandler(ErrorStatus._GPT_CONNECT_FAIL);
+        }
     }
 
     @Async
@@ -230,6 +235,7 @@ public class MessageService {
                 .defaultHeader("content-type", "application/json")
                 .build();
 
+
         MessageDTO.ClaudeReqDto request = MessageDTO.ClaudeReqDto.builder()
                 .model(claudeModel)
                 .messages(List.of(MessageDTO.ClaudeReqDto.Message.builder()
@@ -239,6 +245,8 @@ public class MessageService {
                 .max_tokens(maxTokens)
                 .build();
 
+
+        //url call
         MessageDTO.claudeResDto response;
         try {
             response = webClient.post()
