@@ -25,7 +25,19 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //채팅 관련 응답
     _NOT_EXIST_CHAT(HttpStatus.NOT_FOUND, "CHAT501", "존재하지 않는 채팅방 아이디입니다"),
-    _NOT_MATCH_CHAT(HttpStatus.NOT_FOUND, "CHAT501", "사용할 수 없는 채팅방입니다."),
+    _NOT_MATCH_CHAT(HttpStatus.NOT_FOUND, "CHAT502", "사용할 수 없는 채팅방입니다."),
+    _INVALID_AI_TYPE(HttpStatus.NOT_FOUND, "CHAT503", "유효하지 않은 AI 타입입니다."),
+
+    //AI 관련 응답
+    _NOT_EXIST_TOKEN(HttpStatus.NOT_FOUND, "AI501", "토큰을 보유하고 있지 않습니다"),
+    _BARD_CONNECT_FAIL(HttpStatus.BAD_REQUEST, "AI502", "Bard 응답 요청 중 에러가 발생했습니다"),
+    _BARD_RESPONSE_NULL(HttpStatus.INTERNAL_SERVER_ERROR, "AI503", "Bard 응답값이 비어있습니다"),
+    _GPT_CONNECT_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "AI504", "GPT 응답 요청 중 에러가 발생했습니다"),
+    _GPT_RESPONSE_NULL(HttpStatus.INTERNAL_SERVER_ERROR, "AI504", "GPT 응답값이 비어있습니다"),
+    _CLAUDE_CONNECT_FAIL(HttpStatus.BAD_REQUEST, "AI505", "CLAUDE 응답 요청 중 에러가 발생했습니다"),
+    _CLAUDE_RESPONSE_NULL(HttpStatus.BAD_REQUEST, "AI505", "CLAUDE 응답값이 비어있습니다"),
+    _DEEPSEEK_CONNECT_FAIL(HttpStatus.BAD_REQUEST, "AI505", "DeepSeek 응답 요청 중 에러가 발생했습니다"),
+    _DEEPSEEK_RESPONSE_NULL(HttpStatus.INTERNAL_SERVER_ERROR, "AI506", "DeepSeek 응답값이 비어있습니다"),
     ;
 
     private final HttpStatus httpStatus;

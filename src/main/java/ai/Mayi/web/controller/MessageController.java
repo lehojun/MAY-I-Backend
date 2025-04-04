@@ -6,6 +6,7 @@ import ai.Mayi.apiPayload.exception.handler.MessageHandler;
 import ai.Mayi.domain.Chat;
 import ai.Mayi.domain.Message;
 import ai.Mayi.domain.User;
+import ai.Mayi.domain.enums.MessageType;
 import ai.Mayi.service.ChatService;
 import ai.Mayi.service.MessageService;
 import ai.Mayi.service.UserServiceImpl;
@@ -19,7 +20,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Tag(name = "MessageController", description = "채팅 메세지 관련 API")
 @RestController
@@ -32,53 +36,43 @@ public class MessageController {
 
     @PostMapping("")
     @Operation(summary = "채팅 입력 API")
-    public ApiResponse<MessageDTO.enterChatResDTO> enterChat(@RequestBody @Valid MessageDTO.enterChatReqDTO request) {
+    public ApiResponse<MessageDTO.enterChatResDTO> enterChat(@RequestBody @Valid MessageDTO.enterChatReqDTO request) throws InterruptedException, ExecutionException {
         User user = userService.findUserById(request.getUserId());
         Chat chat = chatService.findChatById(request.getChatId());
 
         if(chat.getUser() != user){
             throw new MessageHandler(ErrorStatus._NOT_MATCH_CHAT);
         }
+        if(request.getAiTypeList().contains(MessageType.USER)){
+            throw new MessageHandler(ErrorStatus._INVALID_AI_TYPE);
+        }
 
-        messageService.enterChat(chat, request.getText());
+        Message userMessage = messageService.enterChat(chat, request.getText());
 
-        List<MessageDTO.ChatResDTO> responseDTOList = request.getAiTypeList().stream()
-                .map(messageType -> {
-                    Message message = Message.builder()
-                            .chat(chat)
-                            .build();
-                    switch (messageType){
-                        case GPT -> {
-                            //gpt service
-                            message.setMessageType(messageType);
-                            message = messageService.GPTService(message);
-                        }
-                        case CLAUDE -> {
-                            //CLAUDE service
-                            message.setMessageType(messageType);
-                            message = messageService.ClaudeService(message);
-                        }
-                        case BARD -> {
-                            //BARD service
-                            message.setMessageType(messageType);
-                            message = messageService.BardService(message);
-                        }
-                        case COPLIOT -> {
-                            //COPLIOT service
-                            message.setMessageType(messageType);
-                            message = messageService.CopliotService(message);
-                        }
-                        default -> throw new MessageHandler(ErrorStatus._NOT_EXIST_TOKEN_TYPE);
-                    }
-                    return MessageDTO.ChatResDTO.builder()
-                            .messageType(message.getMessageType())
-                            .text(message.getText())
-                            .build();
-                }).toList();
+        List<CompletableFuture<MessageDTO.ChatResDTO>> futures = new ArrayList<>();
+        if (request.getAiTypeList().contains(MessageType.GPT)) {
+            futures.add(messageService.GPTService(userMessage));
+        }
+        if (request.getAiTypeList().contains(MessageType.DEEPSEEK)) {
+            futures.add(messageService.DeepSeekService(userMessage));
+        }
+        if (request.getAiTypeList().contains(MessageType.CLAUDE)) {
+            futures.add(messageService.ClaudeService(userMessage));
+        }
+        if (request.getAiTypeList().contains(MessageType.BARD)) {
+            futures.add(messageService.BardService(userMessage));
+        }
+
+        List<MessageDTO.ChatResDTO> responseDTOList = new ArrayList<>();
+        for (CompletableFuture<MessageDTO.ChatResDTO> future : futures) {
+            responseDTOList.add(future.get());
+        }
+
+        responseDTOList.remove(null);
 
         return ApiResponse.onSuccess(MessageDTO.enterChatResDTO.builder()
-                        .chatId(chat.getChatId())
-                        .responseDTOList(responseDTOList)
+                .chatId(chat.getChatId())
+                .responseDTOList(responseDTOList)
                 .build());
     }
 }
