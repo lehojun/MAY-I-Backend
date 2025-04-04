@@ -2,60 +2,45 @@ package ai.Mayi.jwt;
 
 import javax.crypto.SecretKey;
 
+import ai.Mayi.apiPayload.code.status.ErrorStatus;
+import ai.Mayi.apiPayload.exception.handler.JwtHandler;
+import ai.Mayi.apiPayload.exception.handler.UserHandler;
+import ai.Mayi.domain.User;
+import ai.Mayi.repository.UserRepository;
 import ai.Mayi.web.dto.JwtTokenDTO;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class JwtUtil {
     private static SecretKey key;
+    private static UserRepository userRepository;
 
     public JwtUtil(@Value("${jwt.secret}") String jwtkey) {
         byte[] keyBytes = Decoders.BASE64.decode(jwtkey);
         key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-
-    // JWT create
     public static JwtTokenDTO generateToken(Authentication authentication) {
-
-        //List -> String
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
-
-        long now = (new Date()).getTime();
-
-        Date accessTokenExpiresIn = new Date(now + 20000);
-
-        // create accessToken
-        String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim("auth", authorities) //권한
-                .expiration(accessTokenExpiresIn)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-
-        // create refreshToken
-        String refreshToken = Jwts.builder()
-                .expiration(new Date(now + 30000)) //ms 단위
-                .signWith(key, SignatureAlgorithm.HS256) //해싱
-                .compact();
+        String accessToken = generateAccessToken(authentication);
+        String refreshToken = generateRefreshToken(authentication);
 
         return JwtTokenDTO.builder()
                 .grantType("Bearer")
@@ -64,13 +49,40 @@ public class JwtUtil {
                 .build();
     }
 
+    public static String generateAccessToken(Authentication authentication) {
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        long now = System.currentTimeMillis();
+        Date accessTokenExpiresIn = new Date(now + 600000);
+
+        return Jwts.builder()
+                .setSubject(authentication.getName())
+                .claim("auth", authorities)
+                .expiration(accessTokenExpiresIn)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public static String generateRefreshToken(Authentication authentication) {
+        long now = System.currentTimeMillis();
+        Date refreshTokenExpiresIn = new Date(now + 3600000);
+
+        return Jwts.builder()
+                .setSubject(authentication.getName())
+                .expiration(refreshTokenExpiresIn)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
     //jwt Token 복호화
     public Authentication getAuthentication(String accessToken) {
 
         Claims claims = parseClaims(accessToken);
 
-        if (claims.get("auth") != null) {
-            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+        if (claims.get("auth") == null) {
+            throw new RuntimeException("accessToken에 권한 정보가 없습니다.");
         }
 
         Collection<? extends GrantedAuthority> authorities =
@@ -78,32 +90,29 @@ public class JwtUtil {
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
-        UserDetails principal = new User(claims.getSubject(), "", authorities);
+        UserDetails principal = new org.springframework.security.core.userdetails.User(claims.getSubject(), "", authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
-    
 
 
     public boolean validateToken(String token) {
-        try{
+        if (token == null || token.trim().isEmpty()) {
+            log.info("JWT claims string is empty.");
+            return false;
+        }
+
+        try {
             Jwts.parser()
                     .verifyWith(key)
                     .build()
                     .parseSignedClaims(token);
             return true;
-        }catch(SecurityException | MalformedJwtException e){
-            log.info("Invalid JWT Token", e);
-        }catch (ExpiredJwtException e) {
-            log.info("Expired JWT Token", e);
-        } catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT Token", e);
-        } catch (IllegalArgumentException e) {
-            log.info("JWT claims string is empty.", e);
+        } catch (Exception e) {
+            log.info("Invalid JWT Token: {}", e.getMessage());
         }
+
         return false;
     }
-
-
 
 
     private Claims parseClaims(String accessToken) {
@@ -114,8 +123,18 @@ public class JwtUtil {
                     .parseSignedClaims(accessToken)
                     .getPayload();
         } catch (ExpiredJwtException e) {
-            return e.getClaims();
+            log.error("parseClaims 메서드 예외 처리");
+            throw new JwtHandler(ErrorStatus._INVALID_JWT);
         }
     }
 
+    public String getUserEmail(String token) {
+        return parseClaims(token).getSubject();
+    }
+
+    public Long getUserId(String userEmail) {
+        Optional<ai.Mayi.domain.User> userOpt = userRepository.findByUserEmail(userEmail);
+        User user = userOpt.get();
+        return user.getUserId();
+    }
 }

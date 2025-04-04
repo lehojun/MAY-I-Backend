@@ -18,10 +18,13 @@ public class UserController {
     private final UserServiceImpl userserviceImpl;
 
     @PostMapping("/login")
-    public JwtTokenDTO login(@RequestBody UserDTO.LoginRequestDTO loginRequestDTO, HttpServletRequest request, HttpServletResponse response) throws Exception {
-
+    public UserDTO.LoginResponseDTO login(@RequestBody UserDTO.LoginRequestDTO loginRequestDTO, HttpServletRequest request, HttpServletResponse response) throws Exception {
        return userserviceImpl.commonLogin(loginRequestDTO,request ,response);
+    }
 
+    @PostMapping("/logout")
+    public void logout(HttpServletResponse response) {
+        userserviceImpl.loginOut(response);
     }
 
 
@@ -35,24 +38,9 @@ public class UserController {
         return "good";
     }
 
-    @PostMapping("/sign-in")
-    public JwtTokenDTO signIn(@RequestBody UserDTO.LoginRequestDTO loginRequestDTO, HttpServletRequest request,HttpServletResponse response) throws Exception {
-
-        log.info("로그인 접속 시도 : {}", loginRequestDTO.toString());
-
-        String username = loginRequestDTO.getUserEmail();
-        String password = loginRequestDTO.getUserPassword();
-
-        JwtTokenDTO jwtTokenDTO = userserviceImpl.commonLogin(loginRequestDTO, request, response);
-
-        log.info("request username = {}, password = {}", username, password);
-        log.info("jwtToken accessToken = {}, refreshToken = {}", jwtTokenDTO.getAccessToken(), jwtTokenDTO.getRefreshToken());
-
-        return jwtTokenDTO;
-    }
-
     @PostMapping("/test")
     public String test() {
         return "success";
     }
+
 }

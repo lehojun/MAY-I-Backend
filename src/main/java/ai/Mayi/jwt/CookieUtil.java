@@ -17,7 +17,7 @@ public class CookieUtil {
     }
 
     public static String getCookieValue(HttpServletRequest request, String name) {
-        // 쿠키가 아무것도 없으면 로그인을 해야지
+
         if (request.getCookies() == null) return null;
 
         return Arrays.stream(request.getCookies())

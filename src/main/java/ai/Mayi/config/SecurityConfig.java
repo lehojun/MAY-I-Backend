@@ -1,8 +1,9 @@
 package ai.Mayi.config;
 
-//import ai.Mayi.jwt.JwtAuthenticationFilter;
 import ai.Mayi.jwt.JwtAuthenticationFilter;
 import ai.Mayi.jwt.JwtUtil;
+import ai.Mayi.repository.UserRepository;
+import ai.Mayi.service.MyUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +20,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtUtil jwtUtil;
-    
+    private final UserRepository userRepository;
+    private final MyUserDetailsService myUserDetailsService;
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtUtil, userRepository, myUserDetailsService);
+    }
+
     //비밀번호 해싱하는 코드
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -29,22 +37,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // REST API이므로 기본 인증 및 CSRF 보호 비활성화
+                // REST API -> CSRF 보호 비활성화
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .csrf(csrf -> csrf.disable())
-                // JWT를 사용하기 때문에 세션을 사용하지 않음
+                // session disable
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 요청에 대한 인증 및 권한 설정
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/swagger-ui/index.html").permitAll() //
-//                        .requestMatchers("/user/sign-in", "user/register").permitAll() // 로그인 API는 인증 없이 접근 가능
-//                        .requestMatchers("/user/register").permitAll() // 로그인 API는 인증 없이 접근 가능
-                        .requestMatchers("/**").permitAll() //
-                        .requestMatchers("/user/test").hasRole("USER") // "USER" 역할 필요
-                        .anyRequest().authenticated() // 나머지 요청은 인증 필요
+//                       .requestMatchers("/**").permitAll() //
+                        .requestMatchers("/user/test").hasRole("USER") // "USER" 권한테스트
+                        .anyRequest().permitAll() // 인증 x
                 )
-                // JWT 인증 필터를 UsernamePasswordAuthenticationFilter 전에 추가
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
