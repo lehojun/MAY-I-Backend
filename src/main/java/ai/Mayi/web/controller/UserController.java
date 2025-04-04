@@ -1,79 +1,43 @@
 package ai.Mayi.web.controller;
-//import ai.Mayi.service.JwtUtil;
-//import ai.Mayi.service.UserServiceImpl;
-import ai.Mayi.service.JwtUtil;
+import ai.Mayi.apiPayload.ApiResponse;
 import ai.Mayi.service.UserServiceImpl;
 import ai.Mayi.web.dto.UserDTO;
-import jakarta.servlet.http.Cookie;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
-@Controller
+@RestController
+@RequestMapping("/user")
 public class UserController {
     private final UserServiceImpl userserviceImpl;
-    private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    
+    @PostMapping("/login")
+    @Operation(summary = "로그인 API")
+    public ApiResponse<String> login(@RequestBody UserDTO.LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
+       userserviceImpl.commonLogin(loginRequestDTO, response);
+       return ApiResponse.onSuccess("로그인 완료되었습니다.");
+    }
 
-    @GetMapping("/login")
-    public String login() {
-        return "login.html";
+    @PostMapping("/logout")
+    @Operation(summary = "로그아웃 API")
+    public ApiResponse<String> logout(HttpServletResponse response) {
+        userserviceImpl.loginOut(response);
+        return ApiResponse.onSuccess("로그아웃 완료되었습니다.");
     }
 
 
-    @GetMapping("/register")
-    public String register() {
-        log.info("Registering get request");
-        return "register.html";
-    }
-
-    @ResponseBody
     @PostMapping("/register")
-    public String user_register(@RequestBody UserDTO.JoinRequestDTO joinDto) throws Exception {
+    @Operation(summary = "회원가입 API")
+    public ApiResponse<String> user_register(@RequestBody UserDTO.JoinRequestDTO joinDto) {
+
         log.info("Registering post user: {}", joinDto.toString());
+
         userserviceImpl.signUp(joinDto);
-        return "good";
-    }
 
-
-    @PostMapping("/login/jwt")
-    @ResponseBody
-    public String loginJWT(@RequestBody Map<String, String> data, HttpServletResponse response){
-
-//        String userEmail = data.get("userEmail");
-//        String userPassword = data.get("userPassword");
-
-        log.info("Login request {}", data);
-
-        var authToken = new UsernamePasswordAuthenticationToken(
-                data.get("userEmail"), data.get("userPassword")
-        );
-
-        log.info("Login JWT: {}", authToken.toString());
-
-        var auth = authenticationManagerBuilder.getObject().authenticate(authToken);
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        var auth2 = SecurityContextHolder.getContext().getAuthentication();
-        var jwt = JwtUtil.createToken(auth2);
-        log.info(jwt);
-
-        Cookie cookie = new Cookie("jwt", jwt);
-        cookie.setMaxAge(10);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        response.addCookie(cookie);
-
-        return jwt;
+        return ApiResponse.onSuccess("회원가입이 완료되었습니다.");
     }
 }

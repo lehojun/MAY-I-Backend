@@ -19,6 +19,16 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //유저 관련 응답
     _NOT_EXIST_USER(HttpStatus.NOT_FOUND, "USER501", "존재하지 않는 유저 아이디입니다"),
+    _SAME_EMAIL(HttpStatus.NOT_FOUND, "USER501", "이미 존재하는 이메일 입니다."),
+    _NOT_EXIST_EMAIL(HttpStatus.NOT_FOUND, "USER502", "존재하지 않는 이메일 입니다."),
+    _NOT_MATCH_PASSWORD(HttpStatus.NOT_FOUND, "USER503", "비밀번호가 틀렸습니다."),
+    
+    //JWT 관련 응답
+    _INVALID_JWT(HttpStatus.UNAUTHORIZED, "JWT401", "유효하지 않은 JWT 토큰입니다."),
+    _EXPIRED_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "JWT402", "액세스 토큰이 만료되었습니다."),
+    _UNSUPPORTED_JWT(HttpStatus.UNAUTHORIZED, "JWT403", "지원되지 않는 JWT 토큰입니다."),
+    _EMPTY_JWT(HttpStatus.UNAUTHORIZED, "JWT404", "JWT 토큰이 비어 있습니다."),
+    _EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "JWT405", "리프레쉬토큰이 만료되었습니다. 로그인을 진행해주세요."),
 
     //토큰 관련 응답
     _NOT_EXIST_TOKEN_TYPE(HttpStatus.NOT_FOUND, "TOKEN501", "존재하지 않는 토큰 타입입니다"),
