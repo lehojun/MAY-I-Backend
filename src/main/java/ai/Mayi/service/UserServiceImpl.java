@@ -106,13 +106,4 @@ public class UserServiceImpl implements UserService {
         // Cookie RefreshToken lifeTime : 1h
         CookieUtil.addCookie(response, "refreshToken", jwtTokenDTO.getRefreshToken(), 3600);
     }
-
-//    public String resolveAccessToken(HttpServletRequest request, String name) {
-//        String accessToken = CookieUtil.getCookieValue(request, "accessToken");
-//        if(accessToken == null) {
-//            log.info("access token is null [Life time is done]");
-//            return null;
-//        }
-//        return accessToken;
-//    }
 }

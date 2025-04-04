@@ -18,7 +18,7 @@ public class UserController {
     
     @PostMapping("/login")
     @Operation(summary = "로그인 API")
-    public ApiResponse<String> login(@RequestBody UserDTO.LoginRequestDTO loginRequestDTO, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public ApiResponse<String> login(@RequestBody UserDTO.LoginRequestDTO loginRequestDTO, HttpServletRequest request, HttpServletResponse response) {
        userserviceImpl.commonLogin(loginRequestDTO,request ,response);
        return ApiResponse.onSuccess("로그인 완료되었습니다.");
     }
@@ -33,7 +33,7 @@ public class UserController {
 
     @PostMapping("/register")
     @Operation(summary = "회원가입 API")
-    public ApiResponse<String> user_register(@RequestBody UserDTO.JoinRequestDTO joinDto) throws Exception {
+    public ApiResponse<String> user_register(@RequestBody UserDTO.JoinRequestDTO joinDto) {
 
         log.info("Registering post user: {}", joinDto.toString());
 
