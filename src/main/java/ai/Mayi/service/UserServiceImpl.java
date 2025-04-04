@@ -1,10 +1,6 @@
 package ai.Mayi.service;
 
-import ai.Mayi.apiPayload.code.ReasonDTO;
 import ai.Mayi.apiPayload.code.status.ErrorStatus;
-import ai.Mayi.apiPayload.code.status.SuccessStatus;
-import ai.Mayi.apiPayload.exception.handler.ChatHandler;
-import ai.Mayi.apiPayload.exception.handler.TokenHandler;
 import ai.Mayi.apiPayload.exception.handler.UserHandler;
 import ai.Mayi.domain.User;
 import ai.Mayi.jwt.CookieUtil;
@@ -12,13 +8,11 @@ import ai.Mayi.jwt.JwtUtil;
 import ai.Mayi.repository.UserRepository;
 import ai.Mayi.web.dto.JwtTokenDTO;
 import ai.Mayi.web.dto.UserDTO;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -37,7 +31,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
-    public void signUp(UserDTO.JoinRequestDTO joinDto) throws Exception {
+    public void signUp(UserDTO.JoinRequestDTO joinDto) {
 
         var result = userRepository.findByUserEmail(joinDto.getUserEmail());
         if (result.isPresent()) {
@@ -65,7 +59,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    public UserDTO.LoginResponseDTO commonLogin(UserDTO.LoginRequestDTO loginRequestDTO, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public UserDTO.LoginResponseDTO commonLogin(UserDTO.LoginRequestDTO loginRequestDTO, HttpServletRequest request, HttpServletResponse response) {
 
         String userEmail = loginRequestDTO.getUserEmail();
         String userPassword = loginRequestDTO.getUserPassword();
@@ -113,12 +107,12 @@ public class UserServiceImpl implements UserService {
         CookieUtil.addCookie(response, "refreshToken", jwtTokenDTO.getRefreshToken(), 3600);
     }
 
-    public String resolveAccessToken(HttpServletRequest request, String name) {
-        String accessToken = CookieUtil.getCookieValue(request, "accessToken");
-        if(accessToken == null) {
-            log.info("access token is null [Life time is done]");
-            return null;
-        }
-        return accessToken;
-    }
+//    public String resolveAccessToken(HttpServletRequest request, String name) {
+//        String accessToken = CookieUtil.getCookieValue(request, "accessToken");
+//        if(accessToken == null) {
+//            log.info("access token is null [Life time is done]");
+//            return null;
+//        }
+//        return accessToken;
+//    }
 }
