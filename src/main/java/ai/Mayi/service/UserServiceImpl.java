@@ -8,7 +8,6 @@ import ai.Mayi.jwt.JwtUtil;
 import ai.Mayi.repository.UserRepository;
 import ai.Mayi.web.dto.JwtTokenDTO;
 import ai.Mayi.web.dto.UserDTO;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
