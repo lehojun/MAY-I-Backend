@@ -4,6 +4,7 @@ import ai.Mayi.apiPayload.code.status.ErrorStatus;
 import ai.Mayi.apiPayload.exception.handler.TokenHandler;
 import ai.Mayi.config.AIConfig;
 import ai.Mayi.apiPayload.exception.handler.MessageHandler;
+import ai.Mayi.converter.MessageConverter;
 import ai.Mayi.domain.Chat;
 import ai.Mayi.domain.Message;
 import ai.Mayi.domain.Token;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -40,6 +42,7 @@ public class MessageService {
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
     private final TokenRepository tokenRepository;
+    private final MessageConverter messageConverter;
     @Value("${ai.model.gpt}") private String gptModel;
     @Value("${ai.api.url.gpt}") private String gptUrl;
     @Value("${ai.model.claude}") private String claudeModel;
@@ -140,6 +143,7 @@ public class MessageService {
                     .chat(userMessage.getChat())
                     .messageType(MessageType.DEEPSEEK)
                     .text(text)
+                    .messageAt(LocalDateTime.now())
                     .build();
             messageRepository.save(message);
 
@@ -169,14 +173,22 @@ public class MessageService {
         String uri = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + key;
 
         //req body init
-        List<MessageDTO.BardContents.Parts> partsList = new ArrayList<>();
-        partsList.add(MessageDTO.BardContents.Parts.builder().text(userMessage.getText()).build());
+        List<MessageDTO.BardContents> contentsList = messageRepository.findByChat(userMessage.getChat()).stream()
+                .filter(message -> message.getMessageType() == MessageType.USER || message.getMessageType() == MessageType.BARD)
+                .map(messageConverter::toBardContents)
+                .toList();
 
-        List<MessageDTO.BardContents> contentsList = new ArrayList<>();
-        contentsList.add(MessageDTO.BardContents.builder().parts(partsList).build());
+        //req body resizing
+        int firstIndex = contentsList.size() - Math.min(contentsList.size(), 3);
+        List<MessageDTO.BardContents> contentsSubList = contentsList.subList(firstIndex, contentsList.size());
+        if(contentsSubList.size() > 1){
+            if(contentsSubList.get(1).getRole().equals("user")){
+                contentsSubList = contentsSubList.subList(contentsList.size() - 1, contentsList.size());
+            }
+        }
 
         MessageDTO.BardChatReqDTO reqBody = MessageDTO.BardChatReqDTO.builder()
-                .contents(contentsList)
+                .contents(contentsSubList)
                 .build();
 
         //url call
@@ -200,6 +212,7 @@ public class MessageService {
                     .chat(userMessage.getChat())
                     .messageType(MessageType.BARD)
                     .text(text)
+                    .messageAt(LocalDateTime.now())
                     .build();
             messageRepository.save(message);
 
