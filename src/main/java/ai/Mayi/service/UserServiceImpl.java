@@ -6,7 +6,9 @@ import ai.Mayi.domain.User;
 import ai.Mayi.jwt.CookieUtil;
 import ai.Mayi.jwt.JwtUtil;
 import ai.Mayi.repository.UserRepository;
+import ai.Mayi.web.dto.CommonDTO;
 import ai.Mayi.web.dto.JwtTokenDTO;
+import ai.Mayi.web.dto.TokenDTO;
 import ai.Mayi.web.dto.UserDTO;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
@@ -29,8 +31,10 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final JwtUtil jwtUtil;
+    private final TokenService tokenService;
 
-    public void signUp(UserDTO.JoinRequestDTO joinDto) {
+    public CommonDTO.IsSuccessDTO signUp(UserDTO.JoinRequestDTO joinDto) {
 
         var result = userRepository.findByUserEmail(joinDto.getUserEmail());
         if (result.isPresent()) {
@@ -51,6 +55,10 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         userRepository.save(user);
+
+        return CommonDTO.IsSuccessDTO.builder()
+                .isSuccess(true)
+                .build();
     }
 
     public User findUserById(Long userId){
@@ -90,6 +98,20 @@ public class UserServiceImpl implements UserService {
     public void loginOut(HttpServletResponse response) {
         CookieUtil.addCookie(response, "accessToken", null, 0);
         CookieUtil.addCookie(response, "refreshToken", null, 0);
+    }
+
+    public UserDTO.UserDataResponseDTO sendUserData(String accessToken){
+        String userEmail = jwtUtil.getUserEmail(accessToken);
+        Optional<User> userOpt = userRepository.findByUserEmail(userEmail);
+        User user = userOpt.orElseThrow(() -> new UserHandler(ErrorStatus._NOT_EXIST_USER));
+        //토큰 서비스 불러서 저장하기
+        TokenDTO.getTokenResDto aiToken = tokenService.getToken(user.getUserId());
+
+        return UserDTO.UserDataResponseDTO.builder()
+                .userEmail(user.getUserEmail())
+                .userName(user.getUsername())
+                .tokenList(aiToken.getTokenList())
+                .build();
     }
 
 

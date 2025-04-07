@@ -1,18 +1,15 @@
 package ai.Mayi.jwt;
 
 import ai.Mayi.apiPayload.code.status.ErrorStatus;
-import ai.Mayi.apiPayload.exception.handler.JwtHandler;
 import ai.Mayi.domain.User;
 import ai.Mayi.repository.UserRepository;
 import ai.Mayi.service.MyUserDetailsService;
-import ai.Mayi.web.dto.JwtTokenDTO;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -82,16 +79,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-//    @Override
-//    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-//        String path = request.getRequestURI();
-//        return path.startsWith("/user/register") || path.startsWith("/user/login");
-//    }
-
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        return !path.startsWith("/user/test"); // "/user/test"만 필터 적용, 나머지는 제외
+        return !path.startsWith("/user/data"); // "/user/test"만 필터 적용, 나머지는 제외
     }
 
     private void sendTokenResponse(HttpServletResponse response, String accessToken) {

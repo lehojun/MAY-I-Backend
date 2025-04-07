@@ -4,14 +4,12 @@ import javax.crypto.SecretKey;
 
 import ai.Mayi.apiPayload.code.status.ErrorStatus;
 import ai.Mayi.apiPayload.exception.handler.JwtHandler;
-import ai.Mayi.apiPayload.exception.handler.UserHandler;
 import ai.Mayi.domain.User;
 import ai.Mayi.repository.UserRepository;
 import ai.Mayi.web.dto.JwtTokenDTO;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -122,8 +120,8 @@ public class JwtUtil {
                     .build()
                     .parseSignedClaims(accessToken)
                     .getPayload();
-        } catch (ExpiredJwtException e) {
-            log.error("parseClaims 메서드 예외 처리");
+        } catch (Exception e) {
+            log.error("로그인 다시 하기");
             throw new JwtHandler(ErrorStatus._INVALID_JWT);
         }
     }

@@ -3,6 +3,8 @@ package ai.Mayi.web.dto;
 import lombok.*;
 import org.antlr.v4.runtime.misc.NotNull;
 
+import java.util.List;
+
 public class UserDTO {
 
     @Builder
@@ -23,15 +25,6 @@ public class UserDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class JoinResponseDTO {
-        private Long userId;
-        private String userEmail;
-    }
-
-    @Builder
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class LoginRequestDTO {
         @NotNull
         private String userEmail;
@@ -45,8 +38,9 @@ public class UserDTO {
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class LoginResponseDTO {
-        private Long userId;
+    public static class UserDataResponseDTO {
+        private String userEmail;
+        private String userName;
+        private List<TokenDTO.tokenDto> tokenList;
     }
-
 }
