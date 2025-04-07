@@ -2,6 +2,7 @@ package ai.Mayi.web.controller;
 import ai.Mayi.apiPayload.ApiResponse;
 import ai.Mayi.jwt.CookieUtil;
 import ai.Mayi.service.UserServiceImpl;
+import ai.Mayi.web.dto.CommonDTO;
 import ai.Mayi.web.dto.UserDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,13 +35,11 @@ public class UserController {
 
     @PostMapping("/register")
     @Operation(summary = "회원가입 API")
-    public ApiResponse<String> userRegister(@RequestBody UserDTO.JoinRequestDTO joinDto) {
+    public ApiResponse<CommonDTO.IsSuccessDTO> userRegister(@RequestBody UserDTO.JoinRequestDTO joinDto) {
 
         log.info("Registering post user: {}", joinDto.toString());
 
-        userserviceImpl.signUp(joinDto);
-
-        return ApiResponse.onSuccess("회원가입이 완료되었습니다.");
+        return ApiResponse.onSuccess(userserviceImpl.signUp(joinDto));
     }
 
     @GetMapping("/data")

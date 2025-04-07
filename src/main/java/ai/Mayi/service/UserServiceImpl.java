@@ -6,6 +6,7 @@ import ai.Mayi.domain.User;
 import ai.Mayi.jwt.CookieUtil;
 import ai.Mayi.jwt.JwtUtil;
 import ai.Mayi.repository.UserRepository;
+import ai.Mayi.web.dto.CommonDTO;
 import ai.Mayi.web.dto.JwtTokenDTO;
 import ai.Mayi.web.dto.TokenDTO;
 import ai.Mayi.web.dto.UserDTO;
@@ -33,7 +34,7 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
     private final TokenService tokenService;
 
-    public void signUp(UserDTO.JoinRequestDTO joinDto) {
+    public CommonDTO.IsSuccessDTO signUp(UserDTO.JoinRequestDTO joinDto) {
 
         var result = userRepository.findByUserEmail(joinDto.getUserEmail());
         if (result.isPresent()) {
@@ -54,6 +55,10 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         userRepository.save(user);
+
+        return CommonDTO.IsSuccessDTO.builder()
+                .isSuccess(true)
+                .build();
     }
 
     public User findUserById(Long userId){

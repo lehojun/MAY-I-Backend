@@ -25,15 +25,6 @@ public class UserDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class JoinResponseDTO {
-        private Long userId;
-        private String userEmail;
-    }
-
-    @Builder
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class LoginRequestDTO {
         @NotNull
         private String userEmail;
