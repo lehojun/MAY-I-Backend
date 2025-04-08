@@ -69,6 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         String newAccessToken = jwtUtil.generateAccessToken(authentication);
                         sendTokenResponse(response, newAccessToken);
                         SecurityContextHolder.getContext().setAuthentication(authentication);
+                        sendStatusResponse(response, ErrorStatus._REFRESHED_ACCESS_TOKEN);
                         return;
                     }
                 }
@@ -76,7 +77,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             log.warn("저장되어있는 RefreshToken과 쿠키의 AccessToken이 매치되지 않습니다.");
             log.warn("401 에러가 나면 로그인페이지로 이동하게 만들기");
-//            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "저장되어있는 RefreshToken과 쿠키의 AccessToken이 매치되지 않습니다.");
+//            throw new JwtHandler(ErrorStatus._EXPIRED_REFRESH_TOKEN);
             sendStatusResponse(response, ErrorStatus._EXPIRED_REFRESH_TOKEN);
             return;
         }
@@ -88,7 +89,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        return !path.startsWith("/user/data"); // "/user/test"만 필터 적용, 나머지는 제외
+        return !path.startsWith("/user/data");
     }
 
     private void sendTokenResponse(HttpServletResponse response, String accessToken) {
