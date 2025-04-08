@@ -36,6 +36,8 @@ public class User implements UserDetails{
 
     private boolean social;
 
+    private String profileImageUrl;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Chat> chats;
 

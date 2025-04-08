@@ -27,18 +27,21 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2User oAuth2User = super.loadUser(userRequest);
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
-        // 구글에서 email 받기
-        String email = (String) attributes.get("email");
+        //email, profile picture
+        String userEmail = (String) attributes.get("email");
+        String userPicture = (String) attributes.get("picture");
 
         // DB에 있는지 확인하고 없으면 새로 저장
-        Optional<User> userOptional = userRepository.findByUserEmail(email);
+        Optional<User> userOptional = userRepository.findByUserEmail(userEmail);
         User user = userOptional.orElseGet(() -> {
             log.info("현재 소셜로그인 후 DB에 유저 저장 진행 중..");
             User newUser = User.builder()
-                    .userEmail(email)
+                    .userEmail(userEmail)
                     .userName((String) attributes.get("name"))
                     .social(true)
-                    .userPassword(UUID.randomUUID().toString()) // 더미 비밀번호
+                    .profileImageUrl(userPicture)
+                    // dummyPassword
+                    .userPassword(UUID.randomUUID().toString())
                     .build();
             return userRepository.save(newUser);
         });
