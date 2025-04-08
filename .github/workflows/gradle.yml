@@ -1,10 +1,7 @@
 name: Java CI with Gradle
 
-# main 브랜치에 push, PR 이벤트 발생시 동작.
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
     branches: [ "main" ]
 
 jobs:
@@ -14,18 +11,14 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-
-    # 실행 권한 추가
-    - name: Set executable permission for gradlew
-      run: chmod +x ./gradlew
-
+    
     # Spring Boot 어플리케이션 Build (1)
     - name: Spring Boot Build
       run: ./gradlew clean build --exclude-task test
     
     # Docker 이미지 Build (2)
     - name: docker image build
-      run: docker build -t lehojun/test .
+      run: docker build -t lehojun/mayi .
     
     # DockerHub Login (3)
     - name: docker login 
@@ -36,4 +29,41 @@ jobs:
 
     # Docker Hub push (4)
     - name: docker Hub push
-      run: docker push lehojun/test
+      run: docker push lehojun/mayi
+      
+    # GET GitHub IP (5)
+    - name: get GitHub IP 
+      id: ip
+      uses: haythem/public-ip@v1.2
+      
+    # Configure AWS Credentials (6) - AWS 접근 권한 취득(IAM)
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with: 
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-northeast-2
+    
+    # Add github ip to AWS (7)
+    - name: Add GitHub IP to AWS
+      run: |
+        aws ec2 authorize-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+    
+    # AWS EC2 Server Connect & Docker 명령어 실행 (8)
+    - name: AWS EC2 Connection
+      uses: appleboy/ssh-action@v0.1.6
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        password: ${{ secrets.EC2_PASSWORD }} 
+        port: ${{ secrets.EC2_SSH_PORT }}
+        timeout: 60s
+        script: |
+          sudo docker stop mayi
+          sudo docker rm mayi
+          sudo docker run -it -d -p 8080:8080 --name mayi lehojun/mayi
+    
+    # REMOVE Github IP FROM security group (9)
+    - name: Remove IP FROM security group
+      run: |
+        aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
