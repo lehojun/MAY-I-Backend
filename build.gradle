@@ -47,6 +47,9 @@ dependencies {
 
 	//WebClient
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	//oauth2
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 }
 tasks.named('test') {
 	useJUnitPlatform()
