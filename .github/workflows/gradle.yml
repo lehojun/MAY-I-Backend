@@ -14,7 +14,11 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    
+
+    # 실행 권한 추가
+    - name: Set executable permission for gradlew
+      run: chmod +x ./gradlew
+
     # Spring Boot 어플리케이션 Build (1)
     - name: Spring Boot Build
       run: ./gradlew clean build --exclude-task test
