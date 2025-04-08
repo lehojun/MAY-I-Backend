@@ -63,9 +63,9 @@ jobs:
         port: ${{ secrets.EC2_SSH_PORT }}
         timeout: 60s
         script: |
-          sudo docker stop mayi
-          sudo docker rm mayi
-          sudo docker run -it -d -p 8080:8080 --name mayi lehojun/mayi
+          cd /home/ubuntu
+          sudo docker-compose down
+          sudo docker-compose up -d  
     
     # REMOVE Github IP FROM security group (9)
     - name: Remove IP FROM security group
