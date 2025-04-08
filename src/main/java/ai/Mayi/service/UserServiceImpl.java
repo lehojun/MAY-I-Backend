@@ -110,6 +110,7 @@ public class UserServiceImpl implements UserService {
         return UserDTO.UserDataResponseDTO.builder()
                 .userEmail(user.getUserEmail())
                 .userName(user.getUsername())
+                .profilePicture(user.getProfileImageUrl())
                 .tokenList(aiToken.getTokenList())
                 .build();
     }

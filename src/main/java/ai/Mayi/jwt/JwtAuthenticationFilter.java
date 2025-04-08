@@ -33,12 +33,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String accessToken = CookieUtil.getCookieValue(request, "accessToken");
         String requestURI = request.getRequestURI();
-        log.info(requestURI);
 
-        if (requestURI.startsWith("/oauth2/") || requestURI.startsWith("/login") || requestURI.equals("/")) {
-            chain.doFilter(request, response);
-            return;
-        }
+//        if (requestURI.startsWith("/oauth2/") || requestURI.startsWith("/login") || requestURI.equals("/")) {
+//            chain.doFilter(request, response);
+//            return;
+//        }
         // accessToken 검사
         if (accessToken != null && jwtUtil.validateToken(accessToken)) {
             Authentication authentication = jwtUtil.getAuthentication(accessToken);
@@ -50,7 +49,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (refreshToken != null && jwtUtil.validateToken(refreshToken)) {
                 String userEmail = jwtUtil.getUserEmail(refreshToken);
-                log.info("RefreshToken 추출 userEmail {}", userEmail);
 
                 if (userRepository.findByUserEmail(userEmail).isPresent()) {
                     log.info("리프레쉬 토큰안의 정보를 통한 이메일이 존재한다");
@@ -75,9 +73,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
 
-            log.warn("저장되어있는 RefreshToken과 쿠키의 AccessToken이 매치되지 않습니다.");
-            log.warn("401 에러가 나면 로그인페이지로 이동하게 만들기");
-//            throw new JwtHandler(ErrorStatus._EXPIRED_REFRESH_TOKEN);
             sendStatusResponse(response, ErrorStatus._EXPIRED_REFRESH_TOKEN);
             return;
         }

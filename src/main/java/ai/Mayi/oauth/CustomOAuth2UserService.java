@@ -10,10 +10,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -30,6 +27,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         //email, profile picture
         String userEmail = (String) attributes.get("email");
         String userPicture = (String) attributes.get("picture");
+        String role = "USER";
 
         // DB에 있는지 확인하고 없으면 새로 저장
         Optional<User> userOptional = userRepository.findByUserEmail(userEmail);
@@ -38,10 +36,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             User newUser = User.builder()
                     .userEmail(userEmail)
                     .userName((String) attributes.get("name"))
-                    .social(true)
-                    .profileImageUrl(userPicture)
                     // dummyPassword
                     .userPassword(UUID.randomUUID().toString())
+                    .roles(List.of(role))
+                    .social(true)
+                    .profileImageUrl(userPicture)
                     .build();
             return userRepository.save(newUser);
         });
