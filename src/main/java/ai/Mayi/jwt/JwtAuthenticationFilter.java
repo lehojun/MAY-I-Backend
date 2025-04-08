@@ -32,7 +32,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String accessToken = CookieUtil.getCookieValue(request, "accessToken");
+        String requestURI = request.getRequestURI();
 
+//        if (requestURI.startsWith("/oauth2/") || requestURI.startsWith("/login") || requestURI.equals("/")) {
+//            chain.doFilter(request, response);
+//            return;
+//        }
         // accessToken 검사
         if (accessToken != null && jwtUtil.validateToken(accessToken)) {
             Authentication authentication = jwtUtil.getAuthentication(accessToken);
@@ -44,7 +49,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (refreshToken != null && jwtUtil.validateToken(refreshToken)) {
                 String userEmail = jwtUtil.getUserEmail(refreshToken);
-                log.info("RefreshToken 추출 userEmail {}", userEmail);
 
                 if (userRepository.findByUserEmail(userEmail).isPresent()) {
                     log.info("리프레쉬 토큰안의 정보를 통한 이메일이 존재한다");
@@ -63,14 +67,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         String newAccessToken = jwtUtil.generateAccessToken(authentication);
                         sendTokenResponse(response, newAccessToken);
                         SecurityContextHolder.getContext().setAuthentication(authentication);
+                        sendStatusResponse(response, ErrorStatus._REFRESHED_ACCESS_TOKEN);
                         return;
                     }
                 }
             }
 
-            log.warn("저장되어있는 RefreshToken과 쿠키의 AccessToken이 매치되지 않습니다.");
-            log.warn("401 에러가 나면 로그인페이지로 이동하게 만들기");
-//            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "저장되어있는 RefreshToken과 쿠키의 AccessToken이 매치되지 않습니다.");
             sendStatusResponse(response, ErrorStatus._EXPIRED_REFRESH_TOKEN);
             return;
         }
@@ -82,7 +84,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        return !path.startsWith("/user/data"); // "/user/test"만 필터 적용, 나머지는 제외
+        return !path.startsWith("/user/data");
     }
 
     private void sendTokenResponse(HttpServletResponse response, String accessToken) {

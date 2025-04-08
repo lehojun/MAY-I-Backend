@@ -41,6 +41,7 @@ public class UserDTO {
     public static class UserDataResponseDTO {
         private String userEmail;
         private String userName;
+        private String profilePicture;
         private List<TokenDTO.tokenDto> tokenList;
     }
 }

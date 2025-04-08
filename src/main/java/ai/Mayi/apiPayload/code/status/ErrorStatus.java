@@ -28,7 +28,8 @@ public enum ErrorStatus implements BaseErrorCode {
     _EXPIRED_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "JWT402", "액세스 토큰이 만료되었습니다."),
     _UNSUPPORTED_JWT(HttpStatus.UNAUTHORIZED, "JWT403", "지원되지 않는 JWT 토큰입니다."),
     _EMPTY_JWT(HttpStatus.UNAUTHORIZED, "JWT404", "JWT 토큰이 비어 있습니다."),
-    _EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "JWT405", "리프레쉬토큰이 만료되었습니다. 로그인을 진행해주세요."),
+    _EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "JWT405", "리프레쉬토큰이 만료되었거나, 없습니다. 로그인을 진행해주세요."),
+    _REFRESHED_ACCESS_TOKEN(HttpStatus.valueOf(419), "JWT406", "AccessToken이 재발급되었습니다. 요청을 다시 보내주세요."),
 
     //토큰 관련 응답
     _NOT_EXIST_TOKEN_TYPE(HttpStatus.NOT_FOUND, "TOKEN501", "존재하지 않는 토큰 타입입니다"),

@@ -34,6 +34,10 @@ public class User implements UserDetails{
     @Column(name = "refresh_token", length = 500)
     private String refreshToken;  // Refresh Token 저장
 
+    private boolean social;
+
+    private String profileImageUrl;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Chat> chats;
 

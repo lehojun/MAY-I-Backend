@@ -2,6 +2,8 @@ package ai.Mayi.config;
 
 import ai.Mayi.jwt.JwtAuthenticationFilter;
 import ai.Mayi.jwt.JwtUtil;
+import ai.Mayi.oauth.CustomOAuth2SuccessHandler;
+import ai.Mayi.oauth.CustomOAuth2UserService;
 import ai.Mayi.repository.UserRepository;
 import ai.Mayi.service.MyUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final MyUserDetailsService myUserDetailsService;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
@@ -45,8 +49,17 @@ public class SecurityConfig {
                 // 요청에 대한 인증 및 권한 설정
                 .authorizeHttpRequests(auth -> auth
 //                       .requestMatchers("/**").permitAll() //
-                        .requestMatchers("/user/test").hasRole("USER") // "USER" 권한테스트
-                        .anyRequest().permitAll() // 인증 x
+                                .requestMatchers("/user/test").hasRole("USER") // "USER" 권한테스트
+                                .anyRequest().permitAll() // 인증 x
+                )
+                // oauth
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                // login
+                                .userService(customOAuth2UserService)
+                        )
+                        // After login
+                        .successHandler(customOAuth2SuccessHandler)
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
