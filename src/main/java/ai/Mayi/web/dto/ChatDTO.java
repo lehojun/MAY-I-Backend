@@ -11,8 +11,6 @@ public class ChatDTO {
     @ToString
     public static class ChatRequestDTO {
         @NotNull
-        private Long userId;
-        @NotNull
         private String chatName;
     }
 

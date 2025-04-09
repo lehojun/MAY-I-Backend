@@ -22,14 +22,11 @@ import java.util.List;
 @Slf4j
 public class ChatService {
 
-    private final UserRepository userRepository;
     private final ChatConverter chatConverter;
     private final ChatRepository chatRepository;
 
     @Transactional
-    public Chat createChat(ChatDTO.ChatRequestDTO request) {
-        User user = userRepository.findByUserId(request.getUserId()).orElseThrow(
-                () -> new ChatHandler(ErrorStatus._NOT_EXIST_USER));
+    public Chat createChat(ChatDTO.ChatRequestDTO request, User user) {
 
         Chat newChat = chatConverter.toChat(request, user);
         chatRepository.save(newChat);
@@ -38,9 +35,7 @@ public class ChatService {
     }
 
     @Transactional
-    public List<ChatDTO.ChatListResponseDTO> getChatList(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new ChatHandler(ErrorStatus._NOT_EXIST_USER));
+    public List<ChatDTO.ChatListResponseDTO> getChatList(User user) {
 
         List<Chat> chatList = chatRepository.findByUser(user);
         return chatList.stream().map(chatConverter::toChatListDTO).toList();

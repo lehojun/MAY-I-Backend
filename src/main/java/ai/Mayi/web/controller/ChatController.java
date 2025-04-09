@@ -4,9 +4,13 @@ package ai.Mayi.web.controller;
 import ai.Mayi.apiPayload.ApiResponse;
 import ai.Mayi.converter.ChatConverter;
 import ai.Mayi.domain.Chat;
+import ai.Mayi.domain.User;
+import ai.Mayi.jwt.CookieUtil;
 import ai.Mayi.service.ChatService;
+import ai.Mayi.service.UserServiceImpl;
 import ai.Mayi.web.dto.ChatDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,21 +24,26 @@ public class ChatController {
 
     private final ChatService chatService;
     private final ChatConverter chatConverter;
+    private final UserServiceImpl userService;
 
     @PostMapping("")
     @Operation(summary = "채팅방 생성 API")
     public ApiResponse<ChatDTO.ChatResponseDTO> createChatRoom(
-            @RequestBody ChatDTO.ChatRequestDTO chatRequestDTO) {
+            HttpServletRequest http, @RequestBody ChatDTO.ChatRequestDTO chatRequestDTO) {
+        String accessToken = CookieUtil.getCookieValue(http, "accessToken");
+        User user = userService.findByAccessToken(accessToken);
 
-        Chat chat = chatService.createChat(chatRequestDTO);
+        Chat chat = chatService.createChat(chatRequestDTO, user);
         return ApiResponse.onSuccess(chatConverter.toChatDTO(chat));
     }
 
-    @GetMapping("{id}")
+    @GetMapping("")
     @Operation(summary = "채팅방 조회 API")
     public ApiResponse<List<ChatDTO.ChatListResponseDTO>> getChatRoom(
-            @PathVariable(name="id") Long userId) {
+            HttpServletRequest http) {
+        String accessToken = CookieUtil.getCookieValue(http, "accessToken");
+        User user = userService.findByAccessToken(accessToken);
 
-        return ApiResponse.onSuccess(chatService.getChatList(userId));
+        return ApiResponse.onSuccess(chatService.getChatList(user));
     }
 }

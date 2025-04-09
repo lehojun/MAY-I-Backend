@@ -23,8 +23,7 @@ public class TokenService {
     private final TokenRepository tokenRepository;
     private final UserRepository userRepository;
 
-    public CommonDTO.IsSuccessDTO saveToken(TokenDTO.saveTokenReqDto request){
-        User user = userRepository.findByUserId(request.getUserId()).orElseThrow(() -> new TokenHandler(ErrorStatus._NOT_EXIST_USER));
+    public CommonDTO.IsSuccessDTO saveToken(User user, TokenDTO.saveTokenReqDto request){
         final List<Token> tokenList = tokenRepository.findByUser(user);
 
         //입력한 토큰 정보 삽입
@@ -56,9 +55,7 @@ public class TokenService {
                 .build();
     }
 
-    public TokenDTO.getTokenResDto getToken(Long userId){
-        User user = userRepository.findByUserId(userId).orElseThrow(() -> new TokenHandler(ErrorStatus._NOT_EXIST_USER));
-
+    public TokenDTO.getTokenResDto getToken(User user){
         List<TokenDTO.tokenDto> tokenDtoList = tokenRepository.findByUser(user).stream()
                 .map(token -> TokenDTO.tokenDto.builder().
                         tokenType(token.getTokenType().toString())
