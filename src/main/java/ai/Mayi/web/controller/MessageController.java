@@ -7,18 +7,18 @@ import ai.Mayi.domain.Chat;
 import ai.Mayi.domain.Message;
 import ai.Mayi.domain.User;
 import ai.Mayi.domain.enums.MessageType;
+import ai.Mayi.jwt.CookieUtil;
 import ai.Mayi.service.ChatService;
 import ai.Mayi.service.MessageService;
 import ai.Mayi.service.UserServiceImpl;
 import ai.Mayi.web.dto.MessageDTO;
+import ai.Mayi.web.dto.TokenDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public class MessageController {
     private final UserServiceImpl userService;
     private final ChatService chatService;
 
-    @PostMapping("")
+    @PostMapping("/")
     @Operation(summary = "채팅 입력 API")
     public ApiResponse<MessageDTO.enterChatResDTO> enterChat(@RequestBody @Valid MessageDTO.enterChatReqDTO request) throws InterruptedException, ExecutionException {
         User user = userService.findUserById(request.getUserId());
@@ -74,5 +74,15 @@ public class MessageController {
                 .chatId(chat.getChatId())
                 .responseDTOList(responseDTOList)
                 .build());
+    }
+
+    @GetMapping("/{chatId}")
+    @Operation(summary = "메세지 조회 API")
+    public ApiResponse<MessageDTO.getChatResDTO> getMessageList(HttpServletRequest request, @PathVariable Long chatId) {
+        String accessToken = CookieUtil.getCookieValue(request, "accessToken");
+        User user = userService.findByAccessToken(accessToken);
+        Chat chat = chatService.findChatById(chatId);
+
+        return ApiResponse.onSuccess(messageService.getMessageList(user, chat));
     }
 }
