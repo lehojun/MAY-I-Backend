@@ -29,6 +29,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         //email, profile picture
         String userEmail = userInfo.getEmail();
+        if (userEmail == null) {
+            log.error("카카오에서 이메일 못 받아옴: {}", attributes);
+            throw new RuntimeException("카카오 로그인 실패 - 이메일 없음");
+        }
         String userName = userInfo.getName();
         String userPicture = userInfo.getImageUrl();
         String role = "USER";
@@ -48,11 +52,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .build();
             return userRepository.save(newUser);
         });
-
         return new CustomOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
                 attributes,
-                "email" // Principal name
+                "id" // Principal name
         );
     }
     private OAuth2UserInfo getUserInfo(String registrationId, Map<String, Object> attributes) {
