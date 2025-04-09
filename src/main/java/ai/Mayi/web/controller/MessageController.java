@@ -7,6 +7,7 @@ import ai.Mayi.domain.Chat;
 import ai.Mayi.domain.Message;
 import ai.Mayi.domain.User;
 import ai.Mayi.domain.enums.MessageType;
+import ai.Mayi.jwt.CookieUtil;
 import ai.Mayi.service.ChatService;
 import ai.Mayi.service.MessageService;
 import ai.Mayi.service.UserServiceImpl;
@@ -14,6 +15,7 @@ import ai.Mayi.web.dto.MessageDTO;
 import ai.Mayi.web.dto.TokenDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -76,8 +78,9 @@ public class MessageController {
 
     @GetMapping("/{chatId}")
     @Operation(summary = "메세지 조회 API")
-    public ApiResponse<MessageDTO.getChatResDTO> getMessageList(@RequestParam @Valid Long userId, @PathVariable Long chatId) {
-        User user = userService.findUserById(userId);
+    public ApiResponse<MessageDTO.getChatResDTO> getMessageList(HttpServletRequest request, @PathVariable Long chatId) {
+        String accessToken = CookieUtil.getCookieValue(request, "accessToken");
+        User user = userService.findByAccessToken(accessToken);
         Chat chat = chatService.findChatById(chatId);
 
         return ApiResponse.onSuccess(messageService.getMessageList(user, chat));
