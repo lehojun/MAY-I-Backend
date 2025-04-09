@@ -28,9 +28,6 @@ public class TokenDTO {
     @AllArgsConstructor
     @Schema(title = "TOKEN_REQ_01 : 토큰 저장 요청 DTO")
     public static class saveTokenReqDto{
-        @NotNull
-        @Schema(description = "유저 아이디", example = "1")
-        Long userId;
         @NotBlank
         List<tokenDto> tokenList;
     }

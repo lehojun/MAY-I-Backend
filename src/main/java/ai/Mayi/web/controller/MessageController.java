@@ -34,7 +34,7 @@ public class MessageController {
     private final UserServiceImpl userService;
     private final ChatService chatService;
 
-    @PostMapping("/")
+    @PostMapping("")
     @Operation(summary = "채팅 입력 API")
     public ApiResponse<MessageDTO.enterChatResDTO> enterChat(HttpServletRequest http, @RequestBody @Valid MessageDTO.enterChatReqDTO request) throws InterruptedException, ExecutionException {
         String accessToken = CookieUtil.getCookieValue(http, "accessToken");
