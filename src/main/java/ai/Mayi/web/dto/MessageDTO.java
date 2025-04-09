@@ -18,8 +18,6 @@ public class MessageDTO {
         @NotNull
         private Long chatId;
         @NotNull
-        private Long userId;
-        @NotNull
         private List<MessageType> aiTypeList;
         @NotNull
         private String text;
