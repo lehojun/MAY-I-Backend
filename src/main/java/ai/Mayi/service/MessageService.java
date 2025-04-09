@@ -295,4 +295,22 @@ public class MessageService {
 
     }
 
+    public MessageDTO.getChatResDTO getMessageList(User user, Chat chat){
+        if(chat.getUser() != user){
+            throw new MessageHandler(ErrorStatus._NOT_MATCH_CHAT);
+        }
+
+        List<MessageDTO.ChatResDTO> messageDto = messageRepository.findByChat(chat).stream()
+                .map(message -> MessageDTO.ChatResDTO.builder()
+                        .messageType(message.getMessageType())
+                        .text(message.getText())
+                        .build())
+                .toList();
+
+        return MessageDTO.getChatResDTO.builder()
+                .chatId(chat.getChatId())
+                .chatName(chat.getChatName())
+                .messages(messageDto)
+                .build();
+    }
 }
