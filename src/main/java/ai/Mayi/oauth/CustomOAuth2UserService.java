@@ -28,14 +28,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         OAuth2UserInfo userInfo = getUserInfo(registrationId, attributes);
-        String principalAttributionName = principalAttributionName(registrationId);
+
+        String principalAttributionName = getPrincipalAttributeName(registrationId);
+        log.info("attributes: {}", attributes);
 
         //email, profile picture
         String userEmail = userInfo.getEmail();
-        if (userEmail == null) {
-            log.error("카카오에서 이메일 못 받아옴: {}", attributes);
-            throw new RuntimeException("카카오 로그인 실패 - 이메일 없음");
-        }
         String userName = userInfo.getName();
         String userPicture = userInfo.getImageUrl();
         String role = "USER";
@@ -61,24 +59,25 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 principalAttributionName // Principal name
         );
     }
+
     private OAuth2UserInfo getUserInfo(String registrationId, Map<String, Object> attributes) {
         if ("google".equals(registrationId)) {
             return new GoogleUserInfo(attributes);
         } else if ("kakao".equals(registrationId)) {
             return new KakaoUserInfo(attributes);
+        } else if ("naver".equals(registrationId)) {
+            return new NaverUserInfo(attributes);
         } else {
             throw new RuntimeException("Unsupported social login provider: " + registrationId);
         }
     }
 
-    private String principalAttributionName(String registrationId){
-        if(registrationId.equals("google")){
-            return "email";
-        }
-        if(registrationId.equals("kakao")){
-            return "id";
-        }else {
-            throw new SocialLoginHandler(ErrorStatus._INVALID_SOCIAL_LOGIN);
-        }
+    private String getPrincipalAttributeName(String registrationId) {
+        return switch (registrationId) {
+            case "google" -> "email";
+            case "kakao" -> "id";
+            case "naver" -> "response";
+            default -> throw new SocialLoginHandler(ErrorStatus._INVALID_SOCIAL_LOGIN);
+        };
     }
 }

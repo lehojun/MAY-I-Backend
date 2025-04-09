@@ -67,6 +67,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
     private OAuth2UserInfo getUserInfo(String registrationId, Map<String, Object> attributes) {
         if ("google".equals(registrationId)) return new GoogleUserInfo(attributes);
         else if ("kakao".equals(registrationId)) return new KakaoUserInfo(attributes);
+        else if ("naver".equals(registrationId)) return new NaverUserInfo(attributes);
         else throw new SocialLoginHandler(ErrorStatus._INVALID_SOCIAL_LOGIN);
     }
 }
