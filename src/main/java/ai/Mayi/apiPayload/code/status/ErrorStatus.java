@@ -31,6 +31,9 @@ public enum ErrorStatus implements BaseErrorCode {
     _EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "JWT405", "리프레쉬토큰이 만료되었거나, 없습니다. 로그인을 진행해주세요."),
     _REFRESHED_ACCESS_TOKEN(HttpStatus.valueOf(419), "JWT406", "AccessToken이 재발급되었습니다. 요청을 다시 보내주세요."),
 
+    //소셜로그인 관련 응답
+    _INVALID_SOCIAL_LOGIN(HttpStatus.UNAUTHORIZED, "SOCIAL401", "지원하지 않는 소셜로그인 입니다."),
+
     //토큰 관련 응답
     _NOT_EXIST_TOKEN_TYPE(HttpStatus.NOT_FOUND, "TOKEN501", "존재하지 않는 토큰 타입입니다"),
 
