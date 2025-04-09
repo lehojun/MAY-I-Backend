@@ -1,5 +1,7 @@
 package ai.Mayi.oauth;
 
+import ai.Mayi.apiPayload.code.status.ErrorStatus;
+import ai.Mayi.apiPayload.exception.handler.SocialLoginHandler;
 import ai.Mayi.domain.User;
 import ai.Mayi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         OAuth2UserInfo userInfo = getUserInfo(registrationId, attributes);
+        String principalAttributionName = principalAttributionName(registrationId);
 
         //email, profile picture
         String userEmail = userInfo.getEmail();
@@ -55,7 +58,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return new CustomOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
                 attributes,
-                "id" // Principal name
+                principalAttributionName // Principal name
         );
     }
     private OAuth2UserInfo getUserInfo(String registrationId, Map<String, Object> attributes) {
@@ -65,6 +68,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             return new KakaoUserInfo(attributes);
         } else {
             throw new RuntimeException("Unsupported social login provider: " + registrationId);
+        }
+    }
+
+    private String principalAttributionName(String registrationId){
+        if(registrationId.equals("google")){
+            return "email";
+        }
+        if(registrationId.equals("kakao")){
+            return "id";
+        }else {
+            throw new SocialLoginHandler(ErrorStatus._INVALID_SOCIAL_LOGIN);
         }
     }
 }

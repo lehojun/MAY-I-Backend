@@ -54,8 +54,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         cookieUtil.addCookie(response, "accessToken", jwtToken.getAccessToken(), 600);
         cookieUtil.addCookie(response, "refreshToken", jwtToken.getRefreshToken(), 3600);
 
-//        user.get().updateRefreshToken(jwtToken.getRefreshToken());
-//        userRepository.save(user.get());
+
         user.ifPresent(u -> {
             u.updateRefreshToken(jwtToken.getRefreshToken());
             userRepository.save(u);
