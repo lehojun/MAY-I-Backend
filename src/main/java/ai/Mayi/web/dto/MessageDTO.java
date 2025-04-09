@@ -210,5 +210,16 @@ public class MessageDTO {
             private DeepSeekMessage message;
         }
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(title = "MESSAGE_RES_02 : 채팅 조회 응답 DTO")
+    public static class getChatResDTO {
+        Long chatId;
+        String chatName;
+        List<ChatResDTO> messages;
     }
+}
 

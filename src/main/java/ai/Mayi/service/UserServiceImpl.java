@@ -122,4 +122,9 @@ public class UserServiceImpl implements UserService {
         // Cookie RefreshToken lifeTime : 1h
         CookieUtil.addCookie(response, "refreshToken", jwtTokenDTO.getRefreshToken(), 3600);
     }
+
+    public User findByAccessToken(String accessToken){
+        String userEmail = jwtUtil.getUserEmail(accessToken);
+        return userRepository.findByUserEmail(userEmail).orElseThrow(() -> new UserHandler(ErrorStatus._NOT_EXIST_USER));
+    }
 }
