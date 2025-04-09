@@ -4,6 +4,7 @@ import ai.Mayi.jwt.JwtAuthenticationFilter;
 import ai.Mayi.jwt.JwtUtil;
 import ai.Mayi.oauth.CustomOAuth2SuccessHandler;
 import ai.Mayi.oauth.CustomOAuth2UserService;
+import ai.Mayi.oauth.OAuth2RegistrationIdFilter;
 import ai.Mayi.repository.UserRepository;
 import ai.Mayi.service.MyUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -26,7 +28,7 @@ public class SecurityConfig {
     private final MyUserDetailsService myUserDetailsService;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
-
+    private final OAuth2RegistrationIdFilter oAuth2RegistrationIdFilter;
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter(jwtUtil, userRepository, myUserDetailsService);
@@ -61,6 +63,7 @@ public class SecurityConfig {
                         // After login
                         .successHandler(customOAuth2SuccessHandler)
                 )
+                .addFilterBefore(oAuth2RegistrationIdFilter, OAuth2AuthorizationRequestRedirectFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
