@@ -68,7 +68,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         } else if ("naver".equals(registrationId)) {
             return new NaverUserInfo(attributes);
         } else {
-            throw new RuntimeException("Unsupported social login provider: " + registrationId);
+            throw new SocialLoginHandler(ErrorStatus._INVALID_SOCIAL_LOGIN);
         }
     }
 
