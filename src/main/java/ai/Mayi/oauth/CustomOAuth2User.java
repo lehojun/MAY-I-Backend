@@ -13,8 +13,4 @@ public class CustomOAuth2User extends DefaultOAuth2User {
                             String nameAttributeKey) {
         super(authorities, attributes, nameAttributeKey);
     }
-
-    public String getEmail() {
-        return (String) getAttributes().get("email");
-    }
 }

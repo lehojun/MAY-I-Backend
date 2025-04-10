@@ -34,7 +34,6 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
 
-        // 이메일 추출
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String registrationId = (String) request.getSession().getAttribute("registrationId");
 
@@ -42,17 +41,14 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         String userEmail = userInfo.getEmail();
 
-        //이메일로 유저찾기
         Optional<User> user = userRepository.findByUserEmail(userEmail);
 
 
-        // JWT 발급
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userEmail, null, authentication.getAuthorities());
         JwtTokenDTO jwtToken = jwtUtil.generateToken(token);
 
-        // 쿠키에 저장
-        cookieUtil.addCookie(response, "accessToken", jwtToken.getAccessToken(), 600);
-        cookieUtil.addCookie(response, "refreshToken", jwtToken.getRefreshToken(), 3600);
+        cookieUtil.addCookie(response, "accessToken", jwtToken.getAccessToken(), 3600);
+        cookieUtil.addCookie(response, "refreshToken", jwtToken.getRefreshToken(), 3600*24);
 
 
         user.ifPresent(u -> {
@@ -60,7 +56,6 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             userRepository.save(u);
         });
 
-        // 리다이렉트
         response.sendRedirect(oAuth2Properties.getSuccessRedirect());
     }
 

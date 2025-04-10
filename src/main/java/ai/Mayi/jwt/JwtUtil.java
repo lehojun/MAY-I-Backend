@@ -4,8 +4,6 @@ import javax.crypto.SecretKey;
 
 import ai.Mayi.apiPayload.code.status.ErrorStatus;
 import ai.Mayi.apiPayload.exception.handler.JwtHandler;
-import ai.Mayi.domain.User;
-import ai.Mayi.repository.UserRepository;
 import ai.Mayi.web.dto.JwtTokenDTO;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -22,14 +20,12 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class JwtUtil {
     private static SecretKey key;
-    private static UserRepository userRepository;
 
     public JwtUtil(@Value("${jwt.secret}") String jwtkey) {
         byte[] keyBytes = Decoders.BASE64.decode(jwtkey);
@@ -53,7 +49,7 @@ public class JwtUtil {
                 .collect(Collectors.joining(","));
 
         long now = System.currentTimeMillis();
-        Date accessTokenExpiresIn = new Date(now + 600000);
+        Date accessTokenExpiresIn = new Date(now + 3600000);
 
         return Jwts.builder()
                 .setSubject(authentication.getName())
@@ -65,7 +61,7 @@ public class JwtUtil {
 
     public static String generateRefreshToken(Authentication authentication) {
         long now = System.currentTimeMillis();
-        Date refreshTokenExpiresIn = new Date(now + 3600000);
+        Date refreshTokenExpiresIn = new Date(now + 86400000);
 
         return Jwts.builder()
                 .setSubject(authentication.getName())
@@ -130,9 +126,4 @@ public class JwtUtil {
         return parseClaims(token).getSubject();
     }
 
-    public Long getUserId(String userEmail) {
-        Optional<ai.Mayi.domain.User> userOpt = userRepository.findByUserEmail(userEmail);
-        User user = userOpt.get();
-        return user.getUserId();
-    }
 }

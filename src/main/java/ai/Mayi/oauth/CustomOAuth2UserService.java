@@ -32,13 +32,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String principalAttributionName = getPrincipalAttributeName(registrationId);
         log.info("attributes: {}", attributes);
 
-        //email, profile picture
         String userEmail = userInfo.getEmail();
         String userName = userInfo.getName();
         String userPicture = userInfo.getImageUrl();
         String role = "USER";
 
-        // DB에 있는지 확인하고 없으면 새로 저장
         Optional<User> userOptional = userRepository.findByUserEmail(userEmail);
         User user = userOptional.orElseGet(() -> {
             log.info("현재 소셜로그인 후 DB에 유저 저장 진행 중..");
