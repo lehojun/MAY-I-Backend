@@ -32,12 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String accessToken = CookieUtil.getCookieValue(request, "accessToken");
-        String requestURI = request.getRequestURI();
 
-//        if (requestURI.startsWith("/oauth2/") || requestURI.startsWith("/login") || requestURI.equals("/")) {
-//            chain.doFilter(request, response);
-//            return;
-//        }
         // accessToken 검사
         if (accessToken != null && jwtUtil.validateToken(accessToken)) {
             Authentication authentication = jwtUtil.getAuthentication(accessToken);
