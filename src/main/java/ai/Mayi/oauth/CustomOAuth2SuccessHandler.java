@@ -47,8 +47,8 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userEmail, null, authentication.getAuthorities());
         JwtTokenDTO jwtToken = jwtUtil.generateToken(token);
 
-        cookieUtil.addCookie(response, "accessToken", jwtToken.getAccessToken(), 600);
-        cookieUtil.addCookie(response, "refreshToken", jwtToken.getRefreshToken(), 3600);
+        cookieUtil.addCookie(response, "accessToken", jwtToken.getAccessToken(), 3600);
+        cookieUtil.addCookie(response, "refreshToken", jwtToken.getRefreshToken(), 3600*24);
 
 
         user.ifPresent(u -> {

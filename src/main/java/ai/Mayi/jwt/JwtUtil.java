@@ -49,7 +49,7 @@ public class JwtUtil {
                 .collect(Collectors.joining(","));
 
         long now = System.currentTimeMillis();
-        Date accessTokenExpiresIn = new Date(now + 600000);
+        Date accessTokenExpiresIn = new Date(now + 3600000);
 
         return Jwts.builder()
                 .setSubject(authentication.getName())
@@ -61,7 +61,7 @@ public class JwtUtil {
 
     public static String generateRefreshToken(Authentication authentication) {
         long now = System.currentTimeMillis();
-        Date refreshTokenExpiresIn = new Date(now + 3600000);
+        Date refreshTokenExpiresIn = new Date(now + 86400000);
 
         return Jwts.builder()
                 .setSubject(authentication.getName())
