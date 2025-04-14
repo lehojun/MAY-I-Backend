@@ -72,6 +72,7 @@ public class SecurityConfig {
         http
                 // REST API -> CSRF 보호 비활성화
                 .httpBasic(httpBasic -> httpBasic.disable())
+                .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 // session disable
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
