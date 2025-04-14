@@ -9,6 +9,7 @@ import ai.Mayi.jwt.CookieUtil;
 import ai.Mayi.service.ChatService;
 import ai.Mayi.service.UserServiceImpl;
 import ai.Mayi.web.dto.ChatDTO;
+import ai.Mayi.web.dto.CommonDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -45,5 +46,15 @@ public class ChatController {
         User user = userService.findByAccessToken(accessToken);
 
         return ApiResponse.onSuccess(chatService.getChatList(user));
+    }
+
+    @PostMapping("/{chatId}")
+    @Operation(summary = "채팅방 삭제 API")
+    public ApiResponse<CommonDTO.IsSuccessDTO> deleteChatRoom(
+            HttpServletRequest http, @PathVariable Long chatId) {
+        String accessToken = CookieUtil.getCookieValue(http, "accessToken");
+        User user = userService.findByAccessToken(accessToken);
+
+        return ApiResponse.onSuccess(chatService.deleteChat(user,chatId));
     }
 }

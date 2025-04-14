@@ -8,6 +8,7 @@ import ai.Mayi.domain.User;
 import ai.Mayi.repository.ChatRepository;
 import ai.Mayi.repository.UserRepository;
 import ai.Mayi.web.dto.ChatDTO;
+import ai.Mayi.web.dto.CommonDTO;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,5 +44,16 @@ public class ChatService {
 
     public Chat findChatById(Long chatId){
         return chatRepository.findByChatId(chatId).orElseThrow(() -> new ChatHandler(ErrorStatus._NOT_EXIST_CHAT));
+    }
+
+    @Transactional
+    public CommonDTO.IsSuccessDTO deleteChat(User user, Long chatId) {
+
+        Chat chat = findChatById(chatId);
+        chatRepository.delete(chat);
+
+        return CommonDTO.IsSuccessDTO.builder()
+                .isSuccess(true)
+                .build();
     }
 }
