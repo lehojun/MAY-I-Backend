@@ -57,4 +57,10 @@ public class ChatController {
 
         return ApiResponse.onSuccess(chatService.deleteChat(user,chatId));
     }
+
+    @PostMapping("/test")
+    @Operation(summary = "test API")
+    public boolean deleteChatRoom() {
+        return true;
+    }
 }
