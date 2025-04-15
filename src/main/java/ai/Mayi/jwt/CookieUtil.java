@@ -14,8 +14,20 @@ public class CookieUtil {
                 .path("/")
                 .maxAge(maxAge)
                 .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
+                .sameSite("Lax") //TODO:배포할때 None설정
+                .secure(false)
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
+    }
+
+    public static void deleteCookie(HttpServletResponse response, String name) {
+        ResponseCookie cookie = ResponseCookie.from(name, "")
+                .path("/")
+                .maxAge(0)
+                .httpOnly(true)
+                .sameSite("Lax") //TODO:배포할때 None설정
+                .secure(false)
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
