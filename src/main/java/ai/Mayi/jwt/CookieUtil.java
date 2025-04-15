@@ -11,11 +11,17 @@ public class CookieUtil {
     public static void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
         Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); //https환경이 아니라 나중에 바뀌면 true로 변경
+        cookie.setSecure(true); //https환경이 아니라 나중에 바뀌면 true로 변경
         cookie.setPath("/");
-        cookie.setDomain("localhost"); //나중에 배포 주소로 바꿀 것.
+//        cookie.setDomain("localhost"); //나중에 배포 주소로 바꿀 것.
         cookie.setMaxAge(maxAge);
         response.addCookie(cookie);
+
+        // SameSite=None 설정 필요
+        response.setHeader("Set-Cookie", String.format(
+                "%s=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None",
+                name, value, maxAge
+        ));
     }
 
     public static String getCookieValue(HttpServletRequest request, String name) {
