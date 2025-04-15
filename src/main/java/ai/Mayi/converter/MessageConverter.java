@@ -18,10 +18,7 @@ public class MessageConverter {
         List<MessageDTO.BardContents.Parts> partsList = new ArrayList<>();
         partsList.add(MessageDTO.BardContents.Parts.builder().text(message.getText()).build());
 
-        String role = "model";
-        if(message.getMessageType() == MessageType.USER){
-            role = "user";
-        }
+        String role = "user";
 
         return MessageDTO.BardContents.builder().parts(partsList).role(role).build();
     }

@@ -217,6 +217,16 @@ public class MessageDTO {
     public static class getChatResDTO {
         Long chatId;
         String chatName;
+        List<messageDTO> messages;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(title = "MESSAGE_RES_02 : 채팅 조회 응답 DTO-1")
+    public static class messageDTO {
+        Boolean isUser;
         List<ChatResDTO> messages;
     }
 }
