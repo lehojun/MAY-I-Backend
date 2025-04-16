@@ -96,8 +96,11 @@ public class UserServiceImpl implements UserService {
     }
 
     public void loginOut(HttpServletResponse response) {
-        CookieUtil.addCookie(response, "accessToken", null, 0);
-        CookieUtil.addCookie(response, "refreshToken", null, 0);
+        CookieUtil.deleteCookie(response, "accessToken");
+        CookieUtil.deleteCookie(response, "refreshToken");
+
+//        CookieUtil.addCookie(response, "refreshToken", null, 0);
+//        CookieUtil.addCookie(response, "accessToken", null, 0);
     }
 
     public UserDTO.UserDataResponseDTO sendUserData(String accessToken){
@@ -117,10 +120,10 @@ public class UserServiceImpl implements UserService {
 
 
     public void sendTokenResponse(HttpServletResponse response, JwtTokenDTO jwtTokenDTO){
-        // Cookie AccessToken lifeTime : 1m
-        CookieUtil.addCookie(response, "accessToken", jwtTokenDTO.getAccessToken(), 1800);
-        // Cookie RefreshToken lifeTime : 1h
-        CookieUtil.addCookie(response, "refreshToken", jwtTokenDTO.getRefreshToken(), 3600);
+        // Cookie AccessToken lifeTime : 1h
+        CookieUtil.addCookie(response, "accessToken", jwtTokenDTO.getAccessToken(), 3600);
+        // Cookie RefreshToken lifeTime : 1d
+        CookieUtil.addCookie(response, "refreshToken", jwtTokenDTO.getRefreshToken(), 3600*24);
     }
 
     public User findByAccessToken(String accessToken){

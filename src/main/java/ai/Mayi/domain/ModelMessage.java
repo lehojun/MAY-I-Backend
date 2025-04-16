@@ -8,17 +8,25 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Getter
+@DynamicUpdate
+@DynamicInsert
 @Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Message {
+public class ModelMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "message_id")
-    private Long messageId;
+    @Column(name = "model_message_id")
+    private Long modelMessageId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "message_type", length = 30)
+    @NotNull
+    @Setter
+    private MessageType messageType;
 
     @Column(name = "message_at")
     private LocalDateTime messageAt;
@@ -27,13 +35,6 @@ public class Message {
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chat_id")
-    private Chat chat;
-
-    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL)
-    private List<ModelMessage> modelMessages;
-
-    public Message() {
-        this.messageAt = LocalDateTime.now();
-    }
+    @JoinColumn(name = "message_id")
+    private Message message;
 }

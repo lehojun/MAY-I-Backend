@@ -4,14 +4,12 @@ import ai.Mayi.apiPayload.code.status.ErrorStatus;
 import ai.Mayi.apiPayload.exception.handler.TokenHandler;
 import ai.Mayi.apiPayload.exception.handler.MessageHandler;
 import ai.Mayi.converter.MessageConverter;
-import ai.Mayi.domain.Chat;
-import ai.Mayi.domain.Message;
-import ai.Mayi.domain.Token;
-import ai.Mayi.domain.User;
+import ai.Mayi.domain.*;
 import ai.Mayi.domain.enums.MessageType;
 import ai.Mayi.domain.enums.TokenType;
 import ai.Mayi.repository.ChatRepository;
 import ai.Mayi.repository.MessageRepository;
+import ai.Mayi.repository.ModelMessageRepository;
 import ai.Mayi.repository.TokenRepository;
 import ai.Mayi.web.dto.MessageDTO;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +34,8 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final TokenRepository tokenRepository;
     private final MessageConverter messageConverter;
+    private final ModelMessageRepository modelMessageRepository;
+
     @Value("${ai.model.gpt}") private String gptModel;
     @Value("${ai.api.url.gpt}") private String gptUrl;
     @Value("${ai.model.claude}") private String claudeModel;
@@ -44,7 +44,6 @@ public class MessageService {
     public Message enterChat(Chat chat, String text){
         Message message = Message.builder()
                 .chat(chat)
-                .messageType(MessageType.USER)
                 .messageAt(LocalDateTime.now())
                 .text(text)
                 .build();
@@ -86,13 +85,13 @@ public class MessageService {
         if (response != null) {
             String text = response.getChoices().get(0).getMessage().getContent();
 
-            Message message = Message.builder()
-                    .chat(userMessage.getChat())
+            ModelMessage message = ModelMessage.builder()
+                    .message(userMessage)
                     .messageType(MessageType.GPT)
                     .messageAt(LocalDateTime.now())
                     .text(text)
                     .build();
-            messageRepository.save(message);
+            modelMessageRepository.save(message);
 
             return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
                     .text(text)
@@ -144,13 +143,13 @@ public class MessageService {
         if (resBody != null) {
             String text = resBody.getChoices().get(0).getMessage().getContent();
 
-            Message message = Message.builder()
-                    .chat(userMessage.getChat())
+            ModelMessage message = ModelMessage.builder()
+                    .message(userMessage)
                     .messageType(MessageType.DEEPSEEK)
-                    .text(text)
                     .messageAt(LocalDateTime.now())
+                    .text(text)
                     .build();
-            messageRepository.save(message);
+            modelMessageRepository.save(message);
 
             return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
                     .text(text)
@@ -178,25 +177,11 @@ public class MessageService {
         String uri = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + key;
 
         //req body init
-        List<MessageDTO.BardContents> contentsList = messageRepository.findByChat(userMessage.getChat()).stream()
-                .filter(message -> message.getMessageType() == MessageType.USER || message.getMessageType() == MessageType.BARD)
-                .map(messageConverter::toBardContents)
-                .toList();
-
-        //req body resizing
-        int firstIndex = contentsList.size() - Math.min(contentsList.size(), 5);
-        List<MessageDTO.BardContents> contentsSubList = new ArrayList<>(contentsList.subList(firstIndex, contentsList.size()));
-        while(contentsSubList.size() > 1){
-            if(contentsSubList.get(contentsSubList.size() - 2).getRole().equals("user")){
-                contentsSubList.remove(contentsSubList.size() - 2);
-            }
-            else {
-                break;
-            }
-        }
+        List<MessageDTO.BardContents> contentsList = new ArrayList<>();
+        contentsList.add(messageConverter.toBardContents(userMessage));
 
         MessageDTO.BardChatReqDTO reqBody = MessageDTO.BardChatReqDTO.builder()
-                .contents(contentsSubList)
+                .contents(contentsList)
                 .build();
 
         //url call
@@ -216,13 +201,13 @@ public class MessageService {
         if (resBody != null) {
             String text = resBody.getCandidates().get(0).getContent().getParts().get(0).getText();
 
-            Message message = Message.builder()
-                    .chat(userMessage.getChat())
+            ModelMessage message = ModelMessage.builder()
+                    .message(userMessage)
                     .messageType(MessageType.BARD)
-                    .text(text)
                     .messageAt(LocalDateTime.now())
+                    .text(text)
                     .build();
-            messageRepository.save(message);
+            modelMessageRepository.save(message);
 
             return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
                     .text(text)
@@ -278,12 +263,13 @@ public class MessageService {
         if (response != null) {
             String text = response.getContent().get(0).getText();
 
-            Message message = Message.builder()
-                    .chat(userMessage.getChat())
-                    .messageType(MessageType.BARD)
+            ModelMessage message = ModelMessage.builder()
+                    .message(userMessage)
+                    .messageType(MessageType.CLAUDE)
+                    .messageAt(LocalDateTime.now())
                     .text(text)
                     .build();
-            messageRepository.save(message);
+            modelMessageRepository.save(message);
 
             return CompletableFuture.completedFuture(MessageDTO.ChatResDTO.builder()
                     .text(text)
@@ -300,12 +286,32 @@ public class MessageService {
             throw new MessageHandler(ErrorStatus._NOT_MATCH_CHAT);
         }
 
-        List<MessageDTO.ChatResDTO> messageDto = messageRepository.findByChat(chat).stream()
-                .map(message -> MessageDTO.ChatResDTO.builder()
-                        .messageType(message.getMessageType())
-                        .text(message.getText())
-                        .build())
-                .toList();
+        List<MessageDTO.messageDTO> messageDto = new ArrayList<>();
+
+        messageRepository.findByChat(chat).forEach(message -> {
+            //user Message 추가
+            List<MessageDTO.ChatResDTO> messageUserDTO = new ArrayList<>();
+            messageUserDTO.add(MessageDTO.ChatResDTO.builder()
+                    .messageType(MessageType.USER)
+                    .text(message.getText())
+                    .build());
+            messageDto.add(MessageDTO.messageDTO.builder()
+                    .isUser(true)
+                    .messages(messageUserDTO)
+                    .build());
+
+            List<MessageDTO.ChatResDTO> messageModelDTO = new ArrayList<>();
+            messageModelDTO = message.getModelMessages().stream()
+                    .map(modelMessage -> MessageDTO.ChatResDTO.builder()
+                            .messageType(modelMessage.getMessageType())
+                            .text(modelMessage.getText())
+                            .build())
+                    .toList();
+            messageDto.add(MessageDTO.messageDTO.builder()
+                    .isUser(false)
+                    .messages(messageModelDTO)
+                    .build());
+        });
 
         return MessageDTO.getChatResDTO.builder()
                 .chatId(chat.getChatId())
