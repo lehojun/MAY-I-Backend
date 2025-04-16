@@ -14,8 +14,8 @@ public class CookieUtil {
                 .path("/")
                 .maxAge(maxAge)
                 .httpOnly(true)
-                .sameSite("Lax") //TODO:배포할때 None설정
-                .secure(false)
+                .sameSite("None")
+                .secure(true)
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
@@ -26,8 +26,8 @@ public class CookieUtil {
                 .path("/")
                 .maxAge(0)
                 .httpOnly(true)
-                .sameSite("Lax") //TODO:배포할때 None설정
-                .secure(false)
+                .sameSite("None")
+                .secure(true)
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
