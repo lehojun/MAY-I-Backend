@@ -52,9 +52,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
-                "http://localhost:8080",
-                "https://q-at.store",
-                "https://www.q-at.store"
+                "https://mayi.store",
+                "https://www.mayi.store"
         ));
         config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
